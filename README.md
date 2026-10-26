@@ -18,6 +18,7 @@ The project uses:
 ## Getting started
 
 - Install [`docker`](https://docs.docker.com/engine/install/) and [`docker compose`](https://docs.docker.com/compose/install/)
+- Optionally install `make`, to run the [makefile commands](#6-makefile-commands) from the host (`sudo apt install make` on Ubuntu)
 
 > On Ubuntu, `run.sh` installs Docker automatically if it is not installed (see [`docker.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker.sh)).  
 > On other systems, install Docker manually before running it.
@@ -33,11 +34,7 @@ In your terminal use `git` to clone the repository locally.
 
 In `.env` you can setup your postgres variables and some variables used in [`docker-compose.yaml`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker-compose.yaml).
 
-### 3. Give permission to execute the bash scripts
-
-> chmod +x *.sh
-
-### 4. Run the shell script
+### 3. Run the shell script
 
 > ./run.sh
 
@@ -48,12 +45,13 @@ It will ask for the project's name and if you want to use Ecto and UUID (`--bina
 - renames the current folder to the project's name;
 - moves `dev.sh` to `scripts/`;
 - creates `.env.example` and adds `.env` to `.gitignore`;
+- adds the Docker instructions to `AGENTS.md` (so AI agents run `mix` inside the container) and creates `CLAUDE.md` importing it;
 - starts a new git repository.
 
 If Docker is installed by the script, log out and log in again (to apply the `docker` group), then run `./run.sh` again.  
 Check [`run.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/run.sh) file for more information.  
 
-### 5. Add Credo Dependency (optional)
+### 4. Add Credo Dependency (optional)
 
 Check current [`credo`](https://github.com/rrrene/credo) version
 
@@ -65,7 +63,7 @@ defp deps do
 end
 ```
 
-### 6. Start developing
+### 5. Start developing
 
 Go to the project's folder, start the services and open a shell in the app container  
 > cd ../<project_name>  
@@ -76,11 +74,25 @@ Inside the container, get the dependencies, create the database (only if using E
 > mix ecto.create  
 > make app
 
+Or, if you have `make` installed, do the same from the host (first time only for `make app.setup`)  
+> make up  
+> make app.setup  
+> make app
+
 Visit [`http://localhost:4000/`](http://localhost:4000/) and check Phoenix page.  
 
-### 7. Makefile commands
+### 6. Makefile commands
 
-Run them inside the app container.
+The `app.*` commands work both from the host (they run through `docker compose exec`) and inside the app container.
+
+- `make up` / `make down` (host only)  
+   start / stop the services.
+
+- `make shell` (host only)  
+   open a shell in the app container.
+
+- `make app.setup`  
+   get the dependencies, create the database and build the assets (`mix setup`).
 
 - `make app`  
    start the server with an interactive shell (`iex -S mix phx.server`).
@@ -91,13 +103,16 @@ Run them inside the app container.
 - `make app.test`  
    run the tests and format the code. You can pass a file: `make app.test test/my_test.exs`
 
+- `make app.precommit`  
+   compile with warnings as errors, remove unused deps, format and run the tests (`mix precommit`). Run it before committing.
+
 - `make app.test.watch`  
    run the tests on file changes (requires the [`mix_test_watch`](https://github.com/lpil/mix-test.watch) dependency).
 
 - `make app.credo`  
    run Credo in strict mode (requires the Credo dependency).
 
-### 8. Connecting in DBeaver
+### 7. Connecting in DBeaver
 
 Host: `localhost`  
 Port: HOST_PORT defined in `.env` (default `6032`)  
@@ -105,7 +120,7 @@ Database: POSTGRES_DB defined in `.env`
 Username: POSTGRES_USER defined in `.env`  
 Password: POSTGRES_PASSWORD defined in `.env`  
 
-### 9. Managing images and containers
+### 8. Managing images and containers
 
 - `docker compose up -d`  
    up services.
