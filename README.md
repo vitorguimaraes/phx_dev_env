@@ -15,10 +15,12 @@ The project uses:
 - Docker
 - Docker compose
 - Shell script
-
 ## Getting started
 
-- Install [`docker`](https://docs.docker.com/engine/install/) and [`docker-compose`](https://docs.docker.com/compose/install/)
+- Install [`docker`](https://docs.docker.com/engine/install/) and [`docker compose`](https://docs.docker.com/compose/install/)
+
+> On Ubuntu, `run.sh` installs Docker automatically if it is not installed (see [`docker.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker.sh)).  
+> On other systems, install Docker manually before running it.
 
 ## How to run
 
@@ -37,17 +39,21 @@ In `.env` you can setup your postgres variables and some variables used in [`doc
 
 ### 4. Run the shell script
 
-It will run a elixir container in shell, so you can create your Phoenix project.  
-Check [`run.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/run.sh) file for more information.  
 > ./run.sh
 
-### 5. Install CommitLint, Husky and Commitizen (optional)
+It will ask for the project's name and if you want to use Ecto and UUID (`--binary-id`), then:
 
-Optionally you can install these tools, so you can easily implement GitFlow and [`Conventional Commits`](https://www.conventionalcommits.org/) in your project.  
-After you exit from the container in step 5, the installer will ask you for install it.  
-We also recommend that you use [`Gitmoji`](https://gitmoji.dev/)
+- creates the Phoenix project with the container, owned by your user;
+- configures `config/dev.exs` and `config/test.exs` to use the database from `.env`;
+- renames the current folder to the project's name;
+- moves `dev.sh` to `scripts/`;
+- creates `.env.example` and adds `.env` to `.gitignore`;
+- starts a new git repository.
 
-### 6. Add Credo Dependency (optional)
+If Docker is installed by the script, log out and log in again (to apply the `docker` group), then run `./run.sh` again.  
+Check [`run.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/run.sh) file for more information.  
+
+### 5. Add Credo Dependency (optional)
 
 Check current [`credo`](https://github.com/rrrene/credo) version
 
@@ -59,49 +65,59 @@ defp deps do
 end
 ```
 
-### 7. Source .env
+### 6. Start developing
 
-Load the environment variables  
-> source .env
+Go to the project's folder, start the services and open a shell in the app container  
+> cd ../<project_name>  
+> ./scripts/dev.sh
 
-### 8. Get and compile dependencies
-
-`docker compose run --rm api_service sh`
+Inside the container, get the dependencies, create the database (only if using Ecto) and start the server  
 > mix deps.get  
-> mix deps.compile  
-> exit
+> mix ecto.create  
+> make app
 
-### 9. Checking if is everything ok
-
-run `docker compose up -d`  
 Visit [`http://localhost:4000/`](http://localhost:4000/) and check Phoenix page.  
 
-### 10. Files Ownership
+### 7. Makefile commands
 
-Always that you create a new file for you Phoenix project using the container, it will be owned by root.  
-To change the ownership to your user, run in terminal: `sudo chown -R $USER *`  
+Run them inside the app container.
 
-### 11. Connecting in DBeaver
+- `make app`  
+   start the server with an interactive shell (`iex -S mix phx.server`).
+
+- `make app.migrate`  
+   run the migrations.
+
+- `make app.test`  
+   run the tests and format the code. You can pass a file: `make app.test test/my_test.exs`
+
+- `make app.test.watch`  
+   run the tests on file changes (requires the [`mix_test_watch`](https://github.com/lpil/mix-test.watch) dependency).
+
+- `make app.credo`  
+   run Credo in strict mode (requires the Credo dependency).
+
+### 8. Connecting in DBeaver
 
 Host: `localhost`  
-Port: `container port`. Check it with `docker ps`  
+Port: HOST_PORT defined in `.env` (default `6032`)  
 Database: POSTGRES_DB defined in `.env`  
 Username: POSTGRES_USER defined in `.env`  
 Password: POSTGRES_PASSWORD defined in `.env`  
 
-### 12. Managing images and containers
+### 9. Managing images and containers
 
 - `docker compose up -d`  
    up services.
 
 - `docker compose down`  
-   down services
+   down services.
 
-- `docker exec -it $CONTAINER_NAME sh`  
+- `docker exec -it $APP_CONTAINER_NAME sh`  
    exec shell in a running container.
 
-- `docker compose run --rm phoenix_service sh`  
+- `docker compose run --rm app_service sh`  
    run a new container with shell and clean up when exit.
 
-- `docker rm $(docker ps -aq) -f`  
-   delete all running containers
+- `docker compose down -v`  
+   down services and delete the database volume (the database is recreated on the next start).

@@ -1,12 +1,16 @@
-version: "3.8"
-
 services:
   app_service:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        HOST_UID: ${HOST_UID}
+        HOST_GID: ${HOST_GID}
+        APP_PORT: ${APP_PORT}
     image: ${APP_IMAGE_NAME}
     container_name: ${APP_CONTAINER_NAME}
+    # keep the container idle; the server is started manually inside it (make app)
+    command: sleep infinity
     tty: true
     stdin_open: true
     volumes:
@@ -22,10 +26,11 @@ services:
     networks:
       - app_net
     depends_on:
-      - db_service
+      db_service:
+        condition: service_healthy
 
   db_service:
-    image: postgres:alpine
+    image: postgres:18-alpine
     container_name: ${DB_CONTAINER_NAME}
     restart: always
     environment:
@@ -34,8 +39,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "${HOST_PORT}:${POSTGRES_PORT}"
-      # volumes:
-      # - ./data:/var/lib/postgresql/data
+    volumes:
+      - db_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - app_net
 
@@ -43,3 +53,6 @@ networks:
   app_net:
     name: app_net
     driver: bridge
+
+volumes:
+  db_data:

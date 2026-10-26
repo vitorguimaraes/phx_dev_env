@@ -17,32 +17,24 @@ sudo apt update -y
 sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 sudo docker run hello-world
 
-mkdir $HOME/.docker/
-touch $HOME/.docker/config.jsonf
-echo '{' >> $HOME/.docker/config.json
-echo '"psFormat": "\\nName: \\t\\t{{.Names}}\\tCommand: {{.Command}}\\nNetworks: \\t{{.Networks}}\\nRunningFor: \\t{{.RunningFor}}\\nPorts: \\t\\t{{.Ports}}"' >> $HOME/.docker/config.json
-echo '}' >> $HOME/.docker/config.json
+# docker cli config (only if it doesn't exist, to avoid breaking an existing one)
+mkdir -p $HOME/.docker
+if [[ ! -f $HOME/.docker/config.json ]]; then
+  echo '{' > $HOME/.docker/config.json
+  echo '"psFormat": "\\nName: \\t\\t{{.Names}}\\tCommand: {{.Command}}\\nNetworks: \\t{{.Networks}}\\nRunningFor: \\t{{.RunningFor}}\\nPorts: \\t\\t{{.Ports}}"' >> $HOME/.docker/config.json
+  echo '}' >> $HOME/.docker/config.json
+fi
 
 sudo usermod -aG docker $USER
-newgrp docker
-sudo chmod 666 /var/run/docker.sock
-
-docker_check=$(whereis docker)
-dockercompose_check=$(whereis compose)
 
 clear
 
-if [[ "$docker_check" == *"/etc/docker"* ]]; then  
+if command -v docker >/dev/null && sudo docker compose version >/dev/null 2>&1; then
   docker --version
-  printf "Docker installed!\n"
-else 
-  printf "Docker not installed!\n"
-fi 
-
-if [[ "$dockercompose_check" == *"/usr/bin/compose"* ]]; then 
-  docker compose version 
-  printf "Docker Compose installed!"
-else 
-  printf "Docker Compose not installed!"
-fi 
+  sudo docker compose version
+  printf "Docker and Docker Compose installed!\n"
+else
+  printf "Docker installation failed!\n"
+  exit 1
+fi
 printf "\n*******************************************************************\n"
