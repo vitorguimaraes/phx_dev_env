@@ -65,7 +65,15 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
   `__APP_WEB__/components/`; never duplicate markup between pages
 - Mobile-first and responsive on every page
 - Accessibility: every input has a `label`, icon-only buttons have `aria-label`
-- Icons: always `<.icon name="hero-...">`
+- Icons: always `<.icon name="lucide-...">` with a **literal, full name**
+  (e.g. `lucide-shopping-cart`); never build icon names dynamically, because
+  Tailwind only generates CSS for names it finds in the source code
+- Before using an icon, check that `deps/lucide/icons/<name>.svg` exists; to find
+  icons by meaning, search the tags in the JSON files
+  (e.g. `grep -l '"cart"' deps/lucide/icons/*.json`)
+- Heroicons are not installed; generators already produce Lucide icons through the
+  custom templates in `priv/templates/`
+- When upgrading Phoenix, compare `priv/templates/` with the new generator templates
 
 ## Language
 

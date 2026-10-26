@@ -48,6 +48,7 @@ It will ask for the project's name and if you want to use Ecto and UUID (`--bina
 - adds the project conventions to `AGENTS.md` (Docker, commits, tests, UI and language) and creates `CLAUDE.md` importing it;
 - adds a `commit-msg` hook that validates `<gitmoji> <type>(<scope>): <description>` messages;
 - sets `pt_BR` as the default locale, with the Ecto validation errors translated;
+- replaces Heroicons with [`Lucide`](https://lucide.dev/icons) icons, including the `mix phx.gen.*` generators (see `templates/icons/`);
 - appends development instructions to the project's `README.md`;
 - starts a new git repository.
 

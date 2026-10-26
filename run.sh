@@ -121,6 +121,64 @@ cp templates/errors.pt_BR.po priv/gettext/pt_BR/LC_MESSAGES/errors.po
 # development instructions in the project's README
 cat templates/README.development.md >> README.md
 
+# Lucide icons instead of Heroicons (see templates/icons)
+lucide_version="1.56.0"
+
+# sed expressions from the hero -> lucide map (whole icon names only)
+icon_sed_args=()
+while read -r hero lucide; do
+    icon_sed_args+=(-e "s/${hero}([^a-z0-9-]|\$)/${lucide}\1/g")
+done < templates/icons/icons.map
+
+# dependency
+export LUCIDE_DEP="{:lucide,
+       github: \"lucide-icons/lucide\",
+       tag: \"${lucide_version}\",
+       sparse: \"icons\",
+       app: false,
+       compile: false,
+       depth: 1}"
+perl -0pi -e 's/\{:heroicons,.*?depth: 1\}/$ENV{LUCIDE_DEP}/s' mix.exs
+
+# Tailwind plugin
+cp templates/icons/lucide.js assets/vendor/lucide.js
+rm -f assets/vendor/heroicons.js
+sed -i 's/"hero-#{ICON}"/"lucide-#{ICON}"/; s/heroicons/lucide/g' assets/css/app.css
+
+# <.icon> component that validates the icon names in dev and test
+export ICON_COMPONENT=$(sed "s/__APP__/${project_name}/" templates/icons/icon_component.ex)
+perl -0pi -e 's/  \@doc """\n  Renders a \[Heroicon\].*?\n  def icon\(%\{name: "hero-" <> _\} = assigns\) do\n.*?\n  end\n/$ENV{ICON_COMPONENT}\n/s' \
+    "lib/${project_name}_web/components/core_components.ex"
+for env in dev test; do
+    printf '\n# raise on unknown icon names in <.icon>\nconfig :%s, :validate_icons, true\n' \
+        "$project_name" >> "config/${env}.exs"
+done
+
+# icons used by the generated code and by the Phoenix guidelines in AGENTS.md
+sed -i -E "${icon_sed_args[@]}" \
+    "lib/${project_name}_web/components/core_components.ex" \
+    "lib/${project_name}_web/components/layouts.ex" \
+    AGENTS.md
+sed -i 's/component for hero icons/component for Lucide icons/' AGENTS.md
+sed -i 's|\* \[Heroicons\](https://heroicons.com)|* [Lucide](https://lucide.dev/icons)|' \
+    "lib/${project_name}_web/components/core_components.ex"
+
+# generators (mix phx.gen.*) use the project's priv/templates before their own:
+# copy the generator templates that render icons, with Lucide icons
+docker compose run --rm --no-deps app_service sh -c "mix deps.get && mix deps.unlock --unused"
+# (core_components.ex.eex is skipped: it is only used when the project has none)
+for file in $(grep -rlE 'hero-[a-z0-9-]+' deps/phoenix/priv/templates | grep -v core_components); do
+    target=${file#deps/phoenix/}
+    mkdir -p "$(dirname "$target")"
+    sed -E "${icon_sed_args[@]}" "$file" > "$target"
+done
+
+# warn about icons missing from templates/icons/icons.map (e.g. after a Phoenix upgrade)
+missing_icons=$(grep -rhoE 'hero-[a-z0-9-]+' lib priv/templates AGENTS.md | sort -u)
+if [[ -n "$missing_icons" ]]; then
+    printf "Warning: Heroicons without a Lucide equivalent in templates/icons/icons.map:\n%s\n" "$missing_icons"
+fi
+
 # stop services before renaming the folder (compose identifies the project by folder name)
 docker compose down
 
