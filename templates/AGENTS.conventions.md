@@ -75,6 +75,66 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
   custom templates in `priv/templates/`
 - When upgrading Phoenix, compare `priv/templates/` with the new generator templates
 
+## Design system and screens
+
+- Before any UI work, read `docs/ui/design-system.md`. While its status is `not defined`, the
+  first UI task is the design system setup, and no screen is built before it:
+  1. The developer provides the `light` and `dark` themes from the daisyUI theme generator
+     and the font family (Google Fonts)
+  2. Replace only the variables inside the `light` and `dark` theme blocks of
+     `assets/css/app.css`; keep the block names and the plugin path
+  3. Measure the contrast of every pair in the document's table, in both themes; when a pair
+     is below 4.5:1, propose a close shade that passes and ask before changing it
+  4. Self-host the font: `.woff2` files in `priv/static/fonts/`, `@font-face` in `app.css`
+     and `--font-sans` in its `@theme`
+  5. Fill the typography roles, spacing, radius, icons and components sections
+  6. Create a dev-only `/dev/components` LiveView (next to `/dev/dashboard` in the
+     `dev_routes` scope) showing every component, text role, theme color and icon size
+  7. Set the status to `defined`, run `mix precommit` and commit (`🎨 style: define design system`)
+- Use only the typography roles of the document, never ad hoc text sizes
+- Text contrast is at least 4.5:1; after changing a theme color, measure again and update the table
+- Never load fonts with external `<link>` tags; self-host them in `priv/static/fonts/`
+- When creating or changing a reusable component, add it to `/dev/components` and to the
+  components table
+- Every screen is listed in `docs/ui/screens.md` before it is built:
+  - `Design: none`: build it from the specs and the screen entry; the developer reviews it in
+    the browser
+  - `Design: required`: design it first (see "Design (pen.dev)"); only the developer sets
+    `approved`, and only approved screens are implemented
+  - Keep the status up to date
+
+## Design (pen.dev)
+
+Screens with `Design: required` are designed in `design/app.pen` with the pen.dev MCP tools
+(the file must be open in VS Code with the Pencil extension; if the tools say no file is open,
+ask the developer to reconnect the MCP with `/mcp`). These rules override pen.dev's own
+code-generation guide (React, `:root` variables, `bg-[var(--x)]`, Google Fonts links)
+
+- The design file copies the design system from the code, never the opposite. Before the first
+  designed screen, mirror it: variables named like the daisyUI variables, in `light` and `dark`
+  modes (`color-primary`, `color-primary-content`, ..., `color-base-100`, `color-base-content`,
+  `radius-box`, `radius-field`, `radius-selector`, `font-sans`), with the values of
+  `assets/css/app.css` converted from oklch to hex; and a component library mirroring the
+  components table, named `core/<component>` and `layouts/app`. Compare each library
+  component with `/dev/components` using a `browser` node
+- Screens use only variables (never hex colors), library components, spacing in multiples
+  of 4, the typography roles and `icon` nodes from the `lucide` library
+- Each screen has a `<Screen> / mobile` (390px) and a `<Screen> / desktop` (1440px) frame, with
+  real Brazilian Portuguese text and the empty and error states. Set the frame `context` to the
+  route and LiveView (e.g. `/orders · __APP_MODULE__Web.OrderLive.Index`), then set the screen
+  status to `designed`
+- Implementing an approved screen:
+  - `$color-<name>` → `bg-<name>` / `text-<name>` / `border-<name>`; `$radius-box` → `rounded-box`
+  - pen.dev spacing → Tailwind scale (`gap-4`, `p-6`); never arbitrary `[Npx]` values
+  - library components → the function components in `core_components.ex`
+  - `icon` nodes → `<.icon name="lucide-<icon>">`. pen.dev may use older Lucide names: when
+    `deps/lucide/icons/<icon>.svg` does not exist, find the current name in the `aliases` of
+    the JSON files (e.g. `trash-2` → `trash`)
+  - text → `gettext("...")`; never paste pen.dev's HTML export into the code
+- Visual check: with the server running, add a `browser` node next to the frame pointing to
+  `http://localhost:__APP_HOST_PORT__/<route>`, take screenshots of both (mobile and desktop)
+  and fix the differences before `mix precommit`; then set the status to `implemented`
+
 ## Language
 
 - English for code (modules, functions, variables, database tables and columns),
