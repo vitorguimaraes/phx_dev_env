@@ -215,6 +215,12 @@ mkdir -p .githooks
 cp templates/commit-msg .githooks/commit-msg
 chmod +x .githooks/commit-msg
 
+# CI: the mix precommit checks on every push and pull request
+mkdir -p .github/workflows
+sed -e "s/__POSTGRES_USER__/${POSTGRES_USER:-}/; s/__POSTGRES_PASSWORD__/${POSTGRES_PASSWORD:-}/" \
+    templates/ci.yml > .github/workflows/ci.yml
+keep_blocks db "$use_ecto" .github/workflows/ci.yml
+
 # Brazilian Portuguese as the default locale, with the Ecto errors translated
 export GETTEXT_CONFIG="# Brazilian Portuguese as the default locale
 config :${project_name}, ${app_module}Web.Gettext, default_locale: \"pt_BR\"
@@ -237,7 +243,7 @@ cp templates/design/README.md design/README.md
 perl -0pi -e 's/(  defp deps do\n    \[\n)/$1      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},\n      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},\n      {:mix_test_watch, "~> 1.4", only: [:dev, :test], runtime: false},\n/' mix.exs
 grep -q '{:sobelow,' mix.exs || die "Could not add the dev dependencies to mix.exs."
 
-# Credo and Sobelow in mix precommit
+# Credo and Sobelow in mix precommit (the CI runs the same checks)
 perl -0pi -e 's/"format", "test"\]/"format", "credo", "sobelow --skip --exit low --ignore Vuln", "test"]/' mix.exs
 grep -q '"sobelow --skip --exit low --ignore Vuln"' mix.exs || die "Could not add Credo and Sobelow to mix precommit."
 

@@ -17,6 +17,7 @@ Start the services and the server:
 
 Visit [`localhost:__APP_HOST_PORT__`](http://localhost:__APP_HOST_PORT__) (`APP_HOST_PORT` in `.env`). Run `make app.precommit` before committing:
 it compiles with warnings as errors, formats the code and runs Credo, Sobelow and the tests.
+The CI (`.github/workflows/ci.yml`) runs the same checks on every push and pull request.
 
 Commit messages follow `<gitmoji> <type>(<scope>): <description>` and are validated by
 `.githooks/commit-msg`. See `AGENTS.md` for the project conventions.

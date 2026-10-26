@@ -25,6 +25,8 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - Commit at the end of each completed task, only after
   `docker exec __APP_CONTAINER__ mix precommit` passes. Never commit with failing checks.
   It compiles with warnings as errors, formats, runs Credo, Sobelow and the tests
+- CI (`.github/workflows/ci.yml`) runs the same checks on every push and pull request;
+  when adding a check to `mix precommit`, add it to the CI too
 - Make atomic commits: one logical change per commit; split independent changes
 - Format (enforced by `.githooks/commit-msg`): `<gitmoji> <type>(<scope>): <description>`
   - `<scope>` is optional; use the context name (e.g. `accounts`, `blog`)

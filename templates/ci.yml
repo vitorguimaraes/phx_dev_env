@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    # same Elixir/OTP line as Dockerfile.dev (Debian based, so the actions run on it)
+    container: elixir:1.19
+    env:
+      MIX_ENV: test
+    # db:start
+    # named db_service, the hostname in config/test.exs
+    services:
+      db_service:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: __POSTGRES_USER__
+          POSTGRES_PASSWORD: __POSTGRES_PASSWORD__
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    # db:end
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: mix-${{ hashFiles('mix.lock') }}
+          restore-keys: mix-
+
+      - run: mix local.hex --force && mix local.rebar --force
+      - run: mix deps.get
+
+      # the same checks as `mix precommit`, without changing files
+      - run: mix compile --warnings-as-errors
+      - run: mix deps.unlock --check-unused
+      - run: mix format --check-formatted
+      - run: mix credo
+      - run: mix sobelow --skip --exit low --ignore Vuln
+      - run: mix test
