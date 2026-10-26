@@ -101,10 +101,20 @@ sed -i "s/^APP_IMAGE_NAME=.*/APP_IMAGE_NAME=$APP_IMAGE_NAME/" .env
 sed -i "s/^APP_CONTAINER_NAME=.*/APP_CONTAINER_NAME=$APP_CONTAINER_NAME/" .env
 sed -i "s/^DB_CONTAINER_NAME=.*/DB_CONTAINER_NAME=$DB_CONTAINER_NAME/" .env
 
+# host ports of the projects created by run.sh (one line per project:
+# name, app port, database port, path), so stopped projects keep their ports
+projects_registry="${XDG_CONFIG_HOME:-$HOME/.config}/phx_dev_env/projects"
+reserved_ports=" "
+if [[ -f "$projects_registry" ]]; then
+    while IFS=$'\t' read -r _ app_port db_port path; do
+        if [[ -d "$path" ]]; then reserved_ports+="$app_port $db_port "; fi
+    done < "$projects_registry"
+fi
+
 # first free host port from the default (e.g. 4001 if another project is using 4000)
 free_port() {
     local port=$1
-    while [[ -n "$(ss -ltnH "sport = :$port" 2>/dev/null)" ]]; do
+    while [[ -n "$(ss -ltnH "sport = :$port" 2>/dev/null)" || "$reserved_ports" == *" $port "* ]]; do
         port=$((port + 1))
     done
     echo "$port"
@@ -310,6 +320,20 @@ rm -rf templates
 rm -rf .git
 git init
 git config core.hooksPath .githooks
+
+# register the host ports (entries of deleted projects are dropped)
+mkdir -p "$(dirname "$projects_registry")"
+{
+    if [[ -f "$projects_registry" ]]; then
+        while IFS=$'\t' read -r name app_port db_port path; do
+            if [[ -d "$path" ]]; then
+                printf "%s\t%s\t%s\t%s\n" "$name" "$app_port" "$db_port" "$path"
+            fi
+        done < "$projects_registry"
+    fi
+    printf "%s\t%s\t%s\t%s\n" "$project_name" "$APP_HOST_PORT" "${DB_HOST_PORT:--}" "$new_project_path"
+} > "$projects_registry.tmp"
+mv "$projects_registry.tmp" "$projects_registry"
 
 printf "\nProject created at %s\n" "$new_project_path"
 if [[ "$use_ecto" == y ]]; then

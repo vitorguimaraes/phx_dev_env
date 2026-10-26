@@ -55,7 +55,7 @@ Then it:
 - sets `pt_BR` as the default locale, with the Ecto validation errors translated;
 - replaces Heroicons with [`Lucide`](https://lucide.dev/icons) icons, including the `mix phx.gen.*` generators (see `templates/icons/`);
 - adds [`credo`](https://github.com/rrrene/credo) and [`mix_test_watch`](https://github.com/lpil/mix-test.watch) as dev/test dependencies;
-- names the containers, image and network after the project and picks free host ports, so several projects can run at the same time;
+- names the containers, image and network after the project and picks free host ports, so several projects can run at the same time (the ports are registered in `~/.config/phx_dev_env/projects`, so a stopped project keeps its ports);
 - adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `design/` for [`pen.dev`](https://pen.dev) designs;
 - appends development instructions to the project's `README.md`;
 - starts a new git repository.
