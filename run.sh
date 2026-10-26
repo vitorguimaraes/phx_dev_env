@@ -387,6 +387,7 @@ mv dev.sh scripts/
 
 rm run.sh
 rm docker.sh
+rm e2e.sh
 rm -rf templates
 
 # delete old git files

@@ -116,7 +116,16 @@ The `app.*` commands work both from the host (they run through `docker compose e
 - `make app.credo`  
    run [`Credo`](https://github.com/rrrene/credo) in strict mode.
 
-### 6. Connecting in DBeaver
+### 6. Testing the template
+
+`e2e.sh` tests `run.sh` end to end: it creates a project from a temporary copy of this folder (including uncommitted changes), checks the generated files, runs `mix setup`, `mix precommit` and the server in the real containers, and removes everything at the end.
+
+> ./e2e.sh                 # with Ecto  
+> ./e2e.sh --auth --release   # with authentication, also building the production image  
+> ./e2e.sh --no-ecto  
+> ./e2e.sh --keep          # keep the project to inspect it
+
+### 7. Connecting in DBeaver
 
 Host: `localhost`  
 Port: DB_HOST_PORT defined in `.env` (default `6032`; only reachable from your machine)  
@@ -124,7 +133,7 @@ Database: POSTGRES_DB defined in `.env`
 Username: POSTGRES_USER defined in `.env`  
 Password: POSTGRES_PASSWORD defined in `.env`  
 
-### 7. Managing images and containers
+### 8. Managing images and containers
 
 - `docker compose up -d`  
    up services.
