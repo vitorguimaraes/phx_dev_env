@@ -45,7 +45,10 @@ It will ask for the project's name and if you want to use Ecto and UUID (`--bina
 - renames the current folder to the project's name;
 - moves `dev.sh` to `scripts/`;
 - creates `.env.example` and adds `.env` to `.gitignore`;
-- adds the Docker instructions to `AGENTS.md` (so AI agents run `mix` inside the container) and creates `CLAUDE.md` importing it;
+- adds the project conventions to `AGENTS.md` (Docker, commits, tests, UI and language) and creates `CLAUDE.md` importing it;
+- adds a `commit-msg` hook that validates `<gitmoji> <type>(<scope>): <description>` messages;
+- sets `pt_BR` as the default locale, with the Ecto validation errors translated;
+- appends development instructions to the project's `README.md`;
 - starts a new git repository.
 
 If Docker is installed by the script, log out and log in again (to apply the `docker` group), then run `./run.sh` again.  
