@@ -241,7 +241,11 @@ mkdir -p priv/gettext/pt_BR/LC_MESSAGES
 cp templates/errors.pt_BR.po priv/gettext/pt_BR/LC_MESSAGES/errors.po
 
 # development instructions in the project's README
-sed "s/__APP_HOST_PORT__/$APP_HOST_PORT/g" templates/README.development.md >> README.md
+sed -e "s/__APP_HOST_PORT__/$APP_HOST_PORT/g; s/__APP_CONTAINER__/$APP_CONTAINER_NAME/g" \
+    -e "s/__APP__/$project_name/g" templates/README.development.md > README.development.md.tmp
+keep_blocks db "$use_ecto" README.development.md.tmp
+cat README.development.md.tmp >> README.md
+rm README.development.md.tmp
 
 # design system, screen inventory and pen.dev design folder
 mkdir -p docs/ui design
@@ -354,6 +358,10 @@ router="lib/${project_name}_web/router.ex"
 perl -0pi -e 's/^(  use \S+, :router\n)/$1$ENV{SECURE_HEADERS}/m; s/plug :put_secure_browser_headers\n/plug :put_secure_browser_headers, \@secure_headers\n/' "$router"
 grep -q 'put_secure_browser_headers, @secure_headers' "$router" \
     || die "Could not add the Content-Security-Policy to $router."
+
+# production image (Dockerfile; the development one is Dockerfile.dev) and release scripts
+docker compose run --rm --no-deps app_service sh -c "mix phx.gen.release --docker" </dev/null
+[[ -f Dockerfile ]] || die "Could not generate the production Dockerfile."
 
 # format the changed files
 docker compose run --rm --no-deps app_service sh -c "mix format"

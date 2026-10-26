@@ -19,6 +19,9 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - Database credentials come from `.env`, which is not committed
 <!-- db:end -->
 - When adding a new variable to `.env` (not committed), also add it to `.env.example`
+- `Dockerfile.dev` is the development image (used by `docker-compose.yaml`); `Dockerfile` is
+  the production release image (`mix phx.gen.release --docker`). When adding a system package
+  needed at runtime, add it to both
 
 ## Commits
 
