@@ -233,9 +233,13 @@ cp templates/docs/ui/design-system.md docs/ui/design-system.md
 sed "s/__APP_MODULE__/$app_module/g" templates/docs/ui/screens.md > docs/ui/screens.md
 cp templates/design/README.md design/README.md
 
-# Credo (make app.credo) and mix_test_watch (make app.test.watch)
-perl -0pi -e 's/(  defp deps do\n    \[\n)/$1      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},\n      {:mix_test_watch, "~> 1.4", only: [:dev, :test], runtime: false},\n/' mix.exs
-grep -q '{:credo,' mix.exs || die "Could not add the dev dependencies to mix.exs."
+# Credo (make app.credo), Sobelow and mix_test_watch (make app.test.watch)
+perl -0pi -e 's/(  defp deps do\n    \[\n)/$1      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},\n      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},\n      {:mix_test_watch, "~> 1.4", only: [:dev, :test], runtime: false},\n/' mix.exs
+grep -q '{:sobelow,' mix.exs || die "Could not add the dev dependencies to mix.exs."
+
+# Credo and Sobelow in mix precommit
+perl -0pi -e 's/"format", "test"\]/"format", "credo", "sobelow --skip --exit low --ignore Vuln", "test"]/' mix.exs
+grep -q '"sobelow --skip --exit low --ignore Vuln"' mix.exs || die "Could not add Credo and Sobelow to mix precommit."
 
 # Lucide icons instead of Heroicons (see templates/icons)
 lucide_version="1.56.0"
@@ -292,6 +296,23 @@ for file in $(grep -rlE 'hero-[a-z0-9-]+' deps/phoenix/priv/templates | grep -v 
     sed -E "${icon_sed_args[@]}" "$file" > "$target"
 done
 [[ -d priv/templates ]] || die "Could not copy the Phoenix generator templates to priv/templates."
+
+# Content-Security-Policy in the browser pipeline (checked by Sobelow, which needs a single
+# string); 'unsafe-inline' is needed by the theme script in root.html.heex and the dev dashboards
+csp="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+export SECURE_HEADERS="
+  # Content-Security-Policy of the browser pipeline; add an origin only when it is needed
+  @secure_headers %{
+    \"content-security-policy\" => \"$csp\"
+  }
+"
+router="lib/${project_name}_web/router.ex"
+perl -0pi -e 's/^(  use \S+, :router\n)/$1$ENV{SECURE_HEADERS}/m; s/plug :put_secure_browser_headers\n/plug :put_secure_browser_headers, \@secure_headers\n/' "$router"
+grep -q 'put_secure_browser_headers, @secure_headers' "$router" \
+    || die "Could not add the Content-Security-Policy to $router."
+
+# format the changed files
+docker compose run --rm --no-deps app_service sh -c "mix format"
 
 # warn about icons missing from templates/icons/icons.map (e.g. after a Phoenix upgrade)
 missing_icons=$(grep -rhoE 'hero-[a-z0-9-]+' lib priv/templates AGENTS.md | sort -u)

@@ -23,7 +23,8 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 ## Commits
 
 - Commit at the end of each completed task, only after
-  `docker exec __APP_CONTAINER__ mix precommit` passes. Never commit with failing checks
+  `docker exec __APP_CONTAINER__ mix precommit` passes. Never commit with failing checks.
+  It compiles with warnings as errors, formats, runs Credo, Sobelow and the tests
 - Make atomic commits: one logical change per commit; split independent changes
 - Format (enforced by `.githooks/commit-msg`): `<gitmoji> <type>(<scope>): <description>`
   - `<scope>` is optional; use the context name (e.g. `accounts`, `blog`)
@@ -77,6 +78,14 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - Heroicons are not installed; generators already produce Lucide icons through the
   custom templates in `priv/templates/`
 - When upgrading Phoenix, compare `priv/templates/` with the new generator templates
+
+## Security
+
+- Fix the issues reported by Credo and Sobelow; **never** disable a check, add
+  `# sobelow_skip` or change `.sobelow-skips` without asking the developer
+- The Content-Security-Policy is `@secure_headers` in `__APP_WEB__/router.ex`. When adding an
+  external resource (CDN script, font, image host, analytics, iframe), add only that origin
+  to the matching directive, and only after the developer agrees to use it
 
 ## Design system and screens
 
