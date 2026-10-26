@@ -18,9 +18,11 @@ services:
       - iex_history:/home/app/.cache/erlang-history
     restart: on-failure
     environment:
+      # db:start
       DATABASE_URL: ${DATABASE_URL}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       POOL_SIZE: ${POOL_SIZE}
+      # db:end
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       PORT: ${APP_PORT}
       # keep the IEx history between sessions (stored in the iex_history volume)
       ERL_AFLAGS: "-kernel shell_history enabled"
@@ -28,10 +30,13 @@ services:
       - "${APP_HOST_PORT}:${APP_PORT}"
     networks:
       - app_net
+    # db:start
     depends_on:
       db_service:
         condition: service_healthy
+    # db:end
 
+  # db:start
   db_service:
     image: postgres:18-alpine
     container_name: ${DB_CONTAINER_NAME}
@@ -52,6 +57,7 @@ services:
       retries: 10
     networks:
       - app_net
+  # db:end
 
 # named by compose after the project's folder, so each project has its own network
 networks:
@@ -59,5 +65,7 @@ networks:
     driver: bridge
 
 volumes:
+  # db:start
   db_data:
+  # db:end
   iex_history:

@@ -24,8 +24,10 @@ app:
 app.setup:
 	$(RUN) mix setup
 
+# db:start
 app.migrate:
 	$(RUN) mix ecto.migrate
+# db:end
 
 app.test:
 	$(RUN) sh -c "MIX_ENV=test mix test $(ARGS) && mix format"

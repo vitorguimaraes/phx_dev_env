@@ -110,9 +110,12 @@ free_port() {
     echo "$port"
 }
 APP_HOST_PORT=$(free_port "$APP_HOST_PORT")
-DB_HOST_PORT=$(free_port "$DB_HOST_PORT")
 sed -i -E "s/^APP_HOST_PORT=[0-9]+/APP_HOST_PORT=$APP_HOST_PORT/" .env
-sed -i -E "s/^DB_HOST_PORT=[0-9]+/DB_HOST_PORT=$DB_HOST_PORT/" .env
+if [[ "$use_ecto" == y ]]; then
+    DB_HOST_PORT=$(free_port "$DB_HOST_PORT")
+else
+    DB_HOST_PORT=
+fi
 
 # (re)build the image with the host user's UID/GID
 docker compose build app_service
@@ -126,24 +129,39 @@ if ! docker compose run --rm --no-deps app_service sh -c "mix phx.new$phx_flags 
     die "Failed to create Phoenix project. Nothing was changed."
 fi
 
-# changes POSTGRES_DB in .env file accordingly to project's name
-# Default name defined by Phoenix is like: project_name_dev
-postgres_db="${project_name}_dev" # name is like: project_name
-sed -i "s/POSTGRES_DB=.*/POSTGRES_DB=$postgres_db/" .env
+# keep (y) or remove (n) the blocks between "<tag>:start" and "<tag>:end" marker lines
+keep_blocks() {
+    local tag=$1 keep=$2
+    shift 2
+    if [[ "$keep" == y ]]; then
+        sed -i "/$tag:start/d; /$tag:end/d" "$@"
+    else
+        sed -i "/$tag:start/,/$tag:end/d" "$@"
+    fi
+}
 
-# change hostname in config/dev.exs and config/test.exs
-# accordingly to postgres service name in docker-compose.yaml (defined as db_service)
-sed -i "s/hostname: .*/hostname: \"$POSTGRES_HOST\",/" ${project_name}/config/dev.exs
-sed -i "s/hostname: .*/hostname: \"$POSTGRES_HOST\",/" ${project_name}/config/test.exs
+# database settings only when using Ecto
+keep_blocks db "$use_ecto" .env docker-compose.yaml makefile
+if [[ "$use_ecto" == y ]]; then
+    sed -i -E "s/^DB_HOST_PORT=[0-9]+/DB_HOST_PORT=$DB_HOST_PORT/" .env
 
-# change database credentials in config/dev.exs and config/test.exs accordingly to .env
-sed -i "s/username: .*/username: \"$POSTGRES_USER\",/" ${project_name}/config/dev.exs
-sed -i "s/password: .*/password: \"$POSTGRES_PASSWORD\",/" ${project_name}/config/dev.exs
-sed -i "s/username: .*/username: \"$POSTGRES_USER\",/" ${project_name}/config/test.exs
-sed -i "s/password: .*/password: \"$POSTGRES_PASSWORD\",/" ${project_name}/config/test.exs
+    # changes POSTGRES_DB in .env file accordingly to project's name
+    # Default name defined by Phoenix is like: project_name_dev
+    sed -i "s/POSTGRES_DB=.*/POSTGRES_DB=${project_name}_dev/" .env
 
-# change pool_size in config/dev.exs to 2
-sed -i "s/pool_size: .*/pool_size: 2/" ${project_name}/config/dev.exs
+    # change hostname in config/dev.exs and config/test.exs
+    # accordingly to postgres service name in docker-compose.yaml (defined as db_service)
+    # and the database credentials accordingly to .env
+    for env in dev test; do
+        sed -i "s/hostname: .*/hostname: \"$POSTGRES_HOST\",/" "${project_name}/config/${env}.exs"
+        sed -i "s/username: .*/username: \"$POSTGRES_USER\",/" "${project_name}/config/${env}.exs"
+        sed -i "s/password: .*/password: \"$POSTGRES_PASSWORD\",/" "${project_name}/config/${env}.exs"
+    done
+
+    # change pool_size in config/dev.exs to 2
+    sed -i "s/pool_size: .*/pool_size: 2/" "${project_name}/config/dev.exs"
+fi
+
 # change ip to local in config/dev.exs
 sed -i "s/http: .*/http: [ip: {0, 0, 0, 0}, port: $APP_PORT],/" "${project_name}/config/dev.exs"
 
@@ -162,7 +180,10 @@ printf "\n# environment variables\n.env\n" >> .gitignore
 
 # project conventions for AI agents (Docker, commits, tests, UI and language)
 app_module=$(sed -E 's/(^|_)([a-z0-9])/\U\2/g' <<< "$project_name")
-conventions=$(<templates/AGENTS.conventions.md)
+cp templates/AGENTS.conventions.md conventions.md.tmp
+keep_blocks db "$use_ecto" conventions.md.tmp
+conventions=$(<conventions.md.tmp)
+rm conventions.md.tmp
 conventions=${conventions//__APP_CONTAINER__/$APP_CONTAINER_NAME}
 conventions=${conventions//__APP_HOST_PORT__/$APP_HOST_PORT}
 conventions=${conventions//__APP_MODULE__/$app_module}
@@ -291,5 +312,9 @@ git init
 git config core.hooksPath .githooks
 
 printf "\nProject created at %s\n" "$new_project_path"
-printf "App: http://localhost:%s | Database: localhost:%s\n" "$APP_HOST_PORT" "$DB_HOST_PORT"
+if [[ "$use_ecto" == y ]]; then
+    printf "App: http://localhost:%s | Database: localhost:%s\n" "$APP_HOST_PORT" "$DB_HOST_PORT"
+else
+    printf "App: http://localhost:%s\n" "$APP_HOST_PORT"
+fi
 printf "Run: cd %s && ./scripts/dev.sh\n" "$new_project_path"

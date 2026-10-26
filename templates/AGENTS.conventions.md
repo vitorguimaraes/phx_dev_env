@@ -4,18 +4,21 @@ Elixir, Erlang and Mix are **not installed on the host**. They only exist inside
 `__APP_CONTAINER__` container. Files are shared with the host through a volume, so edit
 them normally, but run every `mix`, `iex` and `make` command inside the container:
 
-- Start the services (app + database): `docker compose up -d`
+- Start the services: `docker compose up -d`
 - Run a command: `docker exec __APP_CONTAINER__ mix <task>` (e.g. `docker exec __APP_CONTAINER__ mix test`)
 - After changing dependencies in `mix.exs`: `docker exec __APP_CONTAINER__ mix deps.get`
-- Before committing: `docker exec __APP_CONTAINER__ mix precommit` (requires the database running)
+- Before committing: `docker exec __APP_CONTAINER__ mix precommit`
 - **Never** run `mix` on the host or install Elixir/Erlang locally
 - **Never** use `./scripts/dev.sh` (it opens an interactive shell)
 - The dev server is started by the developer with `make app` (interactive); check if it is
   running with `curl -s -o /dev/null -w "%{http_code}" http://localhost:__APP_HOST_PORT__`
+<!-- db:start -->
+- `mix precommit` and `mix test` require the database running (`docker compose up -d`)
 - The database host is `db_service` (Docker network); **do not** change it to `localhost`
   in `config/dev.exs` or `config/test.exs`
-- Database credentials come from `.env`, which is not committed. When adding a new variable,
-  also add it to `.env.example`
+- Database credentials come from `.env`, which is not committed
+<!-- db:end -->
+- When adding a new variable to `.env` (not committed), also add it to `.env.example`
 
 ## Commits
 

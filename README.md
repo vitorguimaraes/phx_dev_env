@@ -46,7 +46,7 @@ The answers can also be given as options (`./run.sh --help`), for example:
 Then it:
 
 - creates the Phoenix project with the container, owned by your user;
-- configures `config/dev.exs` and `config/test.exs` to use the database from `.env`;
+- configures `config/dev.exs` and `config/test.exs` to use the database from `.env` (without Ecto, the database service and variables are removed);
 - renames the current folder to the project's name;
 - moves `dev.sh` to `scripts/`;
 - creates `.env.example` and adds `.env` to `.gitignore`;
