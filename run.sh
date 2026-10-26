@@ -1,5 +1,58 @@
 #!/bin/bash
 
+usage() {
+    cat <<'EOF'
+Usage: ./run.sh [options]
+
+Creates a Phoenix project in this folder. Options not given are asked interactively.
+
+  --name NAME          project name (lowercase letters, numbers and underscores)
+  --ecto, --no-ecto    use Ecto and PostgreSQL (default: yes)
+  --uuid, --no-uuid    use UUID primary keys, --binary-id (default: yes)
+  -h, --help           show this help
+EOF
+}
+
+project_name=""
+use_ecto=""
+use_uuid=""
+while (($#)); do
+    case $1 in
+        --name)
+            if (($# < 2)); then usage; exit 1; fi
+            project_name=$2
+            shift
+            ;;
+        --name=*) project_name=${1#*=} ;;
+        --ecto) use_ecto=y ;;
+        --no-ecto) use_ecto=n ;;
+        --uuid) use_uuid=y ;;
+        --no-uuid) use_uuid=n ;;
+        -h | --help) usage; exit 0 ;;
+        *) printf "Unknown option: %s\n\n" "$1"; usage; exit 1 ;;
+    esac
+    shift
+done
+
+# stop at the first failing command, before the template is removed
+set -eE
+restore_hint="The template folder may be partially changed. To restore it and try again
+(this also discards your changes to .env):
+  docker compose down; git checkout -- . && git clean -fdx"
+trap 'printf "\nrun.sh failed at line %s.\n%s\n" "$LINENO" "$restore_hint" >&2' ERR
+
+die() {
+    printf "%s\n" "$1" >&2
+    exit 1
+}
+
+# prints y or n; $1 is the question, $2 the default answer
+ask_yes_no() {
+    local answer
+    read -r -p "$1 " answer
+    if [[ "${answer:-$2}" =~ ^[Yy] ]]; then echo y; else echo n; fi
+}
+
 source .env
 
 # run the container with the host user, so generated files are owned by you
@@ -11,7 +64,7 @@ if command -v docker >/dev/null && docker compose version >/dev/null 2>&1; then
     printf "Docker is already installed...\n"
 else
     printf "Installing Docker...\n"
-    bash docker.sh || exit 1
+    bash docker.sh
     printf "Log out and log in again (to apply the docker group), then run ./run.sh again.\n"
     exit 0
 fi
@@ -21,21 +74,24 @@ if ! command -v make >/dev/null; then
     printf "Warning: make is not installed. To use the make commands from the host, run: sudo apt install make\n"
 fi
 
-# stop and remove any running services of this project
-docker compose down --remove-orphans
-
-read -p "What is the Project's Name? " project_name
+if [[ -z "$project_name" ]]; then
+    read -r -p "What is the Project's Name? " project_name
+fi
 if [[ ! "$project_name" =~ ^[a-z][a-z0-9_]*$ ]]; then
-    printf "Invalid name: use lowercase letters, numbers and underscores (e.g. my_app).\n"
-    exit 1
+    die "Invalid name: use lowercase letters, numbers and underscores (e.g. my_app)."
 fi
 
 # the current folder will be renamed to the project's name
 new_project_path="$(dirname "$PWD")/$project_name"
 if [[ -e "$new_project_path" ]]; then
-    printf "Folder %s already exists.\n" "$new_project_path"
-    exit 1
+    die "Folder $new_project_path already exists."
 fi
+
+[[ -n "$use_ecto" ]] || use_ecto=$(ask_yes_no "Do you want to use Ecto? [Y/n]" y)
+[[ -n "$use_uuid" ]] || use_uuid=$(ask_yes_no "Do you want to use UUID? [Y/n]" y)
+
+# stop and remove any running services of this project
+docker compose down --remove-orphans
 
 # unique Docker names per project, so several generated projects can run at the same time
 APP_IMAGE_NAME="${project_name}_app"
@@ -45,10 +101,10 @@ sed -i "s/^APP_IMAGE_NAME=.*/APP_IMAGE_NAME=$APP_IMAGE_NAME/" .env
 sed -i "s/^APP_CONTAINER_NAME=.*/APP_CONTAINER_NAME=$APP_CONTAINER_NAME/" .env
 sed -i "s/^DB_CONTAINER_NAME=.*/DB_CONTAINER_NAME=$DB_CONTAINER_NAME/" .env
 
-# first free host ports from the defaults (e.g. 4001 if another project is using 4000)
+# first free host port from the default (e.g. 4001 if another project is using 4000)
 free_port() {
     local port=$1
-    while ss -ltnH "sport = :$port" 2>/dev/null | grep -q .; do
+    while [[ -n "$(ss -ltnH "sport = :$port" 2>/dev/null)" ]]; do
         port=$((port + 1))
     done
     echo "$port"
@@ -61,17 +117,13 @@ sed -i -E "s/^DB_HOST_PORT=[0-9]+/DB_HOST_PORT=$DB_HOST_PORT/" .env
 # (re)build the image with the host user's UID/GID
 docker compose build app_service
 
-read -p "Do you want to use Ecto? [Y/n] " use_ecto
-read -p "Do you want to use UUID? [Y/n] " uuid_answer
-
 phx_flags=""
-[[ "${uuid_answer:-Y}" =~ ^[Yy]$ ]] && phx_flags+=" --binary-id"
-[[ "${use_ecto:-Y}" =~ ^[Nn]$ ]] && phx_flags+=" --no-ecto"
+if [[ "$use_uuid" == y ]]; then phx_flags+=" --binary-id"; fi
+if [[ "$use_ecto" == n ]]; then phx_flags+=" --no-ecto"; fi
 
 if ! docker compose run --rm --no-deps app_service sh -c "mix phx.new$phx_flags $project_name" \
    || [[ ! -d "$project_name" ]]; then
-    printf "Failed to create Phoenix project. Nothing was changed.\n"
-    exit 1
+    die "Failed to create Phoenix project. Nothing was changed."
 fi
 
 # changes POSTGRES_DB in .env file accordingly to project's name
@@ -93,7 +145,7 @@ sed -i "s/password: .*/password: \"$POSTGRES_PASSWORD\",/" ${project_name}/confi
 # change pool_size in config/dev.exs to 2
 sed -i "s/pool_size: .*/pool_size: 2/" ${project_name}/config/dev.exs
 # change ip to local in config/dev.exs
-sed -i "s/http: .*/http: [ip: {0, 0, 0, 0}, port: $APP_PORT],/" ${project_name}/config/dev.exs
+sed -i "s/http: .*/http: [ip: {0, 0, 0, 0}, port: $APP_PORT],/" "${project_name}/config/dev.exs"
 
 # phx.new initializes its own git repository; a new one is created at the end
 rm -rf "${project_name}/.git"
@@ -152,6 +204,7 @@ cp templates/design/README.md design/README.md
 
 # Credo (make app.credo) and mix_test_watch (make app.test.watch)
 perl -0pi -e 's/(  defp deps do\n    \[\n)/$1      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},\n      {:mix_test_watch, "~> 1.4", only: [:dev, :test], runtime: false},\n/' mix.exs
+grep -q '{:credo,' mix.exs || die "Could not add the dev dependencies to mix.exs."
 
 # Lucide icons instead of Heroicons (see templates/icons)
 lucide_version="1.56.0"
@@ -171,6 +224,7 @@ export LUCIDE_DEP="{:lucide,
        compile: false,
        depth: 1}"
 perl -0pi -e 's/\{:heroicons,.*?depth: 1\}/$ENV{LUCIDE_DEP}/s' mix.exs
+grep -q '{:lucide,' mix.exs || die "Could not replace Heroicons with Lucide in mix.exs."
 
 # Tailwind plugin
 cp templates/icons/lucide.js assets/vendor/lucide.js
@@ -181,6 +235,8 @@ sed -i 's/"hero-#{ICON}"/"lucide-#{ICON}"/; s/heroicons/lucide/g' assets/css/app
 export ICON_COMPONENT=$(sed "s/__APP__/${project_name}/" templates/icons/icon_component.ex)
 perl -0pi -e 's/  \@doc """\n  Renders a \[Heroicon\].*?\n  def icon\(%\{name: "hero-" <> _\} = assigns\) do\n.*?\n  end\n/$ENV{ICON_COMPONENT}\n/s' \
     "lib/${project_name}_web/components/core_components.ex"
+grep -q 'validate_icon!' "lib/${project_name}_web/components/core_components.ex" \
+    || die "Could not replace the <.icon> component in core_components.ex."
 for env in dev test; do
     printf '\n# raise on unknown icon names in <.icon>\nconfig :%s, :validate_icons, true\n' \
         "$project_name" >> "config/${env}.exs"
@@ -204,6 +260,7 @@ for file in $(grep -rlE 'hero-[a-z0-9-]+' deps/phoenix/priv/templates | grep -v 
     mkdir -p "$(dirname "$target")"
     sed -E "${icon_sed_args[@]}" "$file" > "$target"
 done
+[[ -d priv/templates ]] || die "Could not copy the Phoenix generator templates to priv/templates."
 
 # warn about icons missing from templates/icons/icons.map (e.g. after a Phoenix upgrade)
 missing_icons=$(grep -rhoE 'hero-[a-z0-9-]+' lib priv/templates AGENTS.md | sort -u)
@@ -214,8 +271,12 @@ fi
 # stop services before renaming the folder (compose identifies the project by folder name)
 docker compose down
 
+# from here on the template folder is renamed
+restore_hint="The project was created at $new_project_path, but the last steps did not finish."
+
 # rename current folder with project's name
 mv "$(pwd)" "$new_project_path"
+cd "$new_project_path"
 
 mkdir scripts
 mv dev.sh scripts/
