@@ -18,7 +18,7 @@ The project uses:
 ## Getting started
 
 - Install [`docker`](https://docs.docker.com/engine/install/) and [`docker compose`](https://docs.docker.com/compose/install/)
-- Optionally install `make`, to run the [makefile commands](#6-makefile-commands) from the host (`sudo apt install make` on Ubuntu)
+- Optionally install `make`, to run the [makefile commands](#5-makefile-commands) from the host (`sudo apt install make` on Ubuntu)
 
 > On Ubuntu, `run.sh` installs Docker automatically if it is not installed (see [`docker.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker.sh)).  
 > On other systems, install Docker manually before running it.
@@ -49,25 +49,15 @@ It will ask for the project's name and if you want to use Ecto and UUID (`--bina
 - adds a `commit-msg` hook that validates `<gitmoji> <type>(<scope>): <description>` messages;
 - sets `pt_BR` as the default locale, with the Ecto validation errors translated;
 - replaces Heroicons with [`Lucide`](https://lucide.dev/icons) icons, including the `mix phx.gen.*` generators (see `templates/icons/`);
+- adds [`credo`](https://github.com/rrrene/credo) and [`mix_test_watch`](https://github.com/lpil/mix-test.watch) as dev/test dependencies;
+- names the containers, image and network after the project and picks free host ports, so several projects can run at the same time;
 - appends development instructions to the project's `README.md`;
 - starts a new git repository.
 
 If Docker is installed by the script, log out and log in again (to apply the `docker` group), then run `./run.sh` again.  
 Check [`run.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/run.sh) file for more information.  
 
-### 4. Add Credo Dependency (optional)
-
-Check current [`credo`](https://github.com/rrrene/credo) version
-
-```elixir
-defp deps do
-  [
-    {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
-  ]
-end
-```
-
-### 5. Start developing
+### 4. Start developing
 
 Go to the project's folder, start the services and open a shell in the app container  
 > cd ../<project_name>  
@@ -83,9 +73,9 @@ Or, if you have `make` installed, do the same from the host (first time only for
 > make app.setup  
 > make app
 
-Visit [`http://localhost:4000/`](http://localhost:4000/) and check Phoenix page.  
+Visit `http://localhost:<APP_HOST_PORT>` (shown at the end of `run.sh` and defined in `.env`, default `4000`) and check Phoenix page.  
 
-### 6. Makefile commands
+### 5. Makefile commands
 
 The `app.*` commands work both from the host (they run through `docker compose exec`) and inside the app container.
 
@@ -111,20 +101,20 @@ The `app.*` commands work both from the host (they run through `docker compose e
    compile with warnings as errors, remove unused deps, format and run the tests (`mix precommit`). Run it before committing.
 
 - `make app.test.watch`  
-   run the tests on file changes (requires the [`mix_test_watch`](https://github.com/lpil/mix-test.watch) dependency).
+   run the tests on file changes ([`mix_test_watch`](https://github.com/lpil/mix-test.watch)).
 
 - `make app.credo`  
-   run Credo in strict mode (requires the Credo dependency).
+   run [`Credo`](https://github.com/rrrene/credo) in strict mode.
 
-### 7. Connecting in DBeaver
+### 6. Connecting in DBeaver
 
 Host: `localhost`  
-Port: HOST_PORT defined in `.env` (default `6032`)  
+Port: DB_HOST_PORT defined in `.env` (default `6032`; only reachable from your machine)  
 Database: POSTGRES_DB defined in `.env`  
 Username: POSTGRES_USER defined in `.env`  
 Password: POSTGRES_PASSWORD defined in `.env`  
 
-### 8. Managing images and containers
+### 7. Managing images and containers
 
 - `docker compose up -d`  
    up services.

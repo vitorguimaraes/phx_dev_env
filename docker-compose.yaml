@@ -15,14 +15,17 @@ services:
     stdin_open: true
     volumes:
       - .:/app
+      - iex_history:/home/app/.cache/erlang-history
     restart: on-failure
     environment:
       DATABASE_URL: ${DATABASE_URL}
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       POOL_SIZE: ${POOL_SIZE}
       PORT: ${APP_PORT}
+      # keep the IEx history between sessions (stored in the iex_history volume)
+      ERL_AFLAGS: "-kernel shell_history enabled"
     ports:
-      - "4000:${APP_PORT}"
+      - "${APP_HOST_PORT}:${APP_PORT}"
     networks:
       - app_net
     depends_on:
@@ -37,8 +40,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    # only reachable from this machine
     ports:
-      - "${HOST_PORT}:${POSTGRES_PORT}"
+      - "127.0.0.1:${DB_HOST_PORT}:${POSTGRES_PORT}"
     volumes:
       - db_data:/var/lib/postgresql
     healthcheck:
@@ -49,10 +53,11 @@ services:
     networks:
       - app_net
 
+# named by compose after the project's folder, so each project has its own network
 networks:
   app_net:
-    name: app_net
     driver: bridge
 
 volumes:
   db_data:
+  iex_history:

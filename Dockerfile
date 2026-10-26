@@ -17,10 +17,14 @@ RUN mkdir -p $APP_HOME && chown app:app $APP_HOME
 WORKDIR $APP_HOME
 
 USER app
+
+# IEx history folder (mounted as a volume); created here so it is owned by the app user
+RUN mkdir -p /home/app/.cache/erlang-history
+
 ARG PHX_VERSION=1.8.16
 RUN mix local.hex --force && \
     mix local.rebar --force && \
     mix archive.install hex phx_new $PHX_VERSION --force
 
-ARG APP_PORT=5001
+ARG APP_PORT=4000
 EXPOSE $APP_PORT

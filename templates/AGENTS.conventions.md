@@ -11,7 +11,7 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - **Never** run `mix` on the host or install Elixir/Erlang locally
 - **Never** use `./scripts/dev.sh` (it opens an interactive shell)
 - The dev server is started by the developer with `make app` (interactive); check if it is
-  running with `curl -s -o /dev/null -w "%{http_code}" http://localhost:4000`
+  running with `curl -s -o /dev/null -w "%{http_code}" http://localhost:__APP_HOST_PORT__`
 - The database host is `db_service` (Docker network); **do not** change it to `localhost`
   in `config/dev.exs` or `config/test.exs`
 - Database credentials come from `.env`, which is not committed. When adding a new variable,
