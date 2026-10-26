@@ -38,15 +38,16 @@ In `.env` you can setup your postgres variables and some variables used in [`doc
 
 > ./run.sh
 
-It will ask for the project's name and if you want to use Ecto and UUID (`--binary-id`).
+It will ask for the project's name, if you want to use Ecto, UUID (`--binary-id`) and authentication (`mix phx.gen.auth`).
 The answers can also be given as options (`./run.sh --help`), for example:
 
-> ./run.sh --name my_app --ecto --uuid
+> ./run.sh --name my_app --ecto --uuid --auth
 
 Then it:
 
 - creates the Phoenix project with the container, owned by your user;
 - configures `config/dev.exs` and `config/test.exs` to use the database from `.env` (without Ecto, the database service and variables are removed);
+- optionally generates authentication with LiveView pages (`mix phx.gen.auth Accounts User users --live`);
 - renames the current folder to the project's name;
 - moves `dev.sh` to `scripts/`;
 - creates `.env.example` and adds `.env` to `.gitignore`;

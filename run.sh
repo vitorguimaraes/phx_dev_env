@@ -9,6 +9,7 @@ Creates a Phoenix project in this folder. Options not given are asked interactiv
   --name NAME          project name (lowercase letters, numbers and underscores)
   --ecto, --no-ecto    use Ecto and PostgreSQL (default: yes)
   --uuid, --no-uuid    use UUID primary keys, --binary-id (default: yes)
+  --auth, --no-auth    generate authentication with mix phx.gen.auth (default: no; requires Ecto)
   -h, --help           show this help
 EOF
 }
@@ -16,6 +17,7 @@ EOF
 project_name=""
 use_ecto=""
 use_uuid=""
+use_auth=""
 while (($#)); do
     case $1 in
         --name)
@@ -28,6 +30,8 @@ while (($#)); do
         --no-ecto) use_ecto=n ;;
         --uuid) use_uuid=y ;;
         --no-uuid) use_uuid=n ;;
+        --auth) use_auth=y ;;
+        --no-auth) use_auth=n ;;
         -h | --help) usage; exit 0 ;;
         *) printf "Unknown option: %s\n\n" "$1"; usage; exit 1 ;;
     esac
@@ -89,6 +93,11 @@ fi
 
 [[ -n "$use_ecto" ]] || use_ecto=$(ask_yes_no "Do you want to use Ecto? [Y/n]" y)
 [[ -n "$use_uuid" ]] || use_uuid=$(ask_yes_no "Do you want to use UUID? [Y/n]" y)
+if [[ "$use_ecto" == n ]]; then
+    [[ "$use_auth" != y ]] || die "Authentication (--auth) requires Ecto."
+    use_auth=n
+fi
+[[ -n "$use_auth" ]] || use_auth=$(ask_yes_no "Do you want authentication (mix phx.gen.auth)? [y/N]" n)
 
 # stop and remove any running services of this project
 docker compose down --remove-orphans
@@ -192,6 +201,7 @@ printf "\n# environment variables\n.env\n" >> .gitignore
 app_module=$(sed -E 's/(^|_)([a-z0-9])/\U\2/g' <<< "$project_name")
 cp templates/AGENTS.conventions.md conventions.md.tmp
 keep_blocks db "$use_ecto" conventions.md.tmp
+keep_blocks auth "$use_auth" conventions.md.tmp
 conventions=$(<conventions.md.tmp)
 rm conventions.md.tmp
 conventions=${conventions//__APP_CONTAINER__/$APP_CONTAINER_NAME}
@@ -302,6 +312,34 @@ for file in $(grep -rlE 'hero-[a-z0-9-]+' deps/phoenix/priv/templates | grep -v 
     sed -E "${icon_sed_args[@]}" "$file" > "$target"
 done
 [[ -d priv/templates ]] || die "Could not copy the Phoenix generator templates to priv/templates."
+
+# authentication (LiveView pages), generated with the Lucide templates above
+if [[ "$use_auth" == y ]]; then
+    docker compose run --rm --no-deps app_service sh -c \
+        "mix phx.gen.auth Accounts User users --live && mix deps.get" </dev/null
+
+    # Credo asks for a @moduledoc in these generated modules
+    add_moduledoc() {
+        local file=$1 doc=$2
+        if ! grep -q '@moduledoc' "$file"; then
+            export MODULEDOC=$doc
+            perl -0pi -e 's/^(defmodule \S+ do\n)/$1  \@moduledoc """\n  $ENV{MODULEDOC}\n  """\n\n/' "$file"
+        fi
+    }
+    add_moduledoc "lib/${project_name}_web/user_auth.ex" \
+        "Plugs and LiveView \`on_mount\` hooks for user authentication."
+    add_moduledoc "lib/${project_name}/accounts/user_notifier.ex" \
+        "Delivers the account emails (login instructions and email update)."
+
+    # the pages render the Ecto errors in pt_BR (errors.po): update the generated tests
+    auth_live_tests="test/${project_name}_web/live/user_live"
+    sed -i -e 's/"has already been taken"/"já está em uso"/' \
+        -e 's/"should be at least 12 character(s)"/"deve ter pelo menos 12 caracteres"/' \
+        "$auth_live_tests"/*.exs
+    if grep -rqE '"(has already been taken|should be at least 12 character\(s\))"' "$auth_live_tests"; then
+        die "Could not translate the Ecto errors in $auth_live_tests."
+    fi
+fi
 
 # Content-Security-Policy in the browser pipeline (checked by Sobelow, which needs a single
 # string); 'unsafe-inline' is needed by the theme script in root.html.heex and the dev dashboards
