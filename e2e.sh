@@ -86,6 +86,7 @@ check "no Heroicons left" bash -c '! grep -rqE "hero-[a-z0-9-]+" lib priv/templa
 check "Lucide dependency" grep -q '{:lucide,' mix.exs
 check "Lucide Tailwind plugin" bash -c '[[ -f assets/vendor/lucide.js && ! -e assets/vendor/heroicons.js ]] && grep -q "lucide" assets/css/app.css'
 check "generator templates with Lucide" grep -rq 'lucide-' priv/templates
+check "fonts installed" bash -c 'ls priv/static/fonts/{figtree,lato}-*.woff2 && grep -q "font-family: \"Figtree\"" assets/css/app.css && grep -q -- "--font-display: \"Lato\"" assets/css/app.css'
 check "pt_BR default locale" grep -q 'default_locale: "pt_BR"' config/config.exs
 check "pt_BR Ecto errors" test -f priv/gettext/pt_BR/LC_MESSAGES/errors.po
 check "Credo, Sobelow and mix_audit in mix precommit" bash -c 'grep -q "\"credo\"," mix.exs && grep -q "\"sobelow --skip --exit low --ignore Vuln\"" mix.exs && grep -q "\"deps.audit\"" mix.exs'
@@ -162,6 +163,8 @@ check "CSP nonce on the LiveDashboard" csp_page_ok /dev/dashboard
 check "CSP nonce on the mailbox preview" csp_page_ok /dev/mailbox
 check "CSP without unsafe-inline scripts" bash -c "! curl -sI $url | grep -i '^content-security-policy:' | grep -q \"script-src[^;]*unsafe-inline\""
 check "app.css has the Lucide icons" bash -c "curl -s $url/assets/css/app.css | grep -q 'lucide-'"
+check "app.css has the fonts" bash -c "curl -s $url/assets/css/app.css | grep -q 'figtree-latin-wght-normal.woff2'"
+check "fonts are served" bash -c "for f in figtree-latin-wght-normal figtree-latin-wght-italic lato-latin-400-normal lato-latin-700-normal; do [[ \$(curl -s -o /dev/null -w '%{http_code}' $url/fonts/\$f.woff2) == 200 ]] || exit 1; done"
 if [[ "$use_auth" == y ]]; then
     check "log in page responds 200" bash -c "[[ \$(curl -s -o /dev/null -w '%{http_code}' $url/users/log-in) == 200 ]]"
     check "CSP nonce on the log in page" csp_page_ok /users/log-in

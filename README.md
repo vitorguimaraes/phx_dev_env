@@ -60,6 +60,7 @@ Then it:
 - adds a GitHub Actions CI (`.github/workflows/ci.yml`) running the `mix precommit` checks on every push and pull request;
 - generates a production release image (`Dockerfile`, `mix phx.gen.release --docker`); the development image is `Dockerfile.dev`;
 - names the containers, image and network after the project and picks free host ports, so several projects can run at the same time (the ports are registered in `~/.config/phx_dev_env/projects`, so a stopped project keeps its ports);
+- installs the Figtree (interface and text) and Lato (titles) fonts, self-hosted (see `templates/fonts/`);
 - adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `design/` for [`pen.dev`](https://pen.dev) designs;
 - appends development instructions to the project's `README.md`;
 - starts a new git repository.

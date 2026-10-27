@@ -111,20 +111,22 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - Before any UI work, read `docs/ui/design-system.md`. While its status is `not defined`, the
   first UI task is the design system setup, and no screen is built before it:
   1. The developer provides the `light` and `dark` themes from the daisyUI theme generator
-     and the font family (Google Fonts)
   2. Replace only the variables inside the `light` and `dark` theme blocks of
      `assets/css/app.css`; keep the block names and the plugin path
   3. Measure the contrast of every pair in the document's table, in both themes; when a pair
      is below 4.5:1, propose a close shade that passes and ask before changing it
-  4. Self-host the font: `.woff2` files in `priv/static/fonts/`, `@font-face` in `app.css`
-     and `--font-sans` in its `@theme`
+  4. The fonts are already installed: Figtree (`--font-sans`) and Lato (`--font-display`) in
+     `priv/static/fonts/` and `app.css`. Do not add or replace fonts without asking
   5. Fill the typography roles, spacing, radius, icons and components sections
   6. Create a dev-only `/dev/components` LiveView (next to `/dev/dashboard` in the
      `dev_routes` scope) showing every component, text role, theme color and icon size
   7. Set the status to `defined`, run `mix precommit` and commit (`🎨 style: define design system`)
 - Use only the typography roles of the document, never ad hoc text sizes
 - Text contrast is at least 4.5:1; after changing a theme color, measure again and update the table
-- Never load fonts with external `<link>` tags; self-host them in `priv/static/fonts/`
+- Use `font-display` only for page and section titles; everything else uses the default
+  `font-sans`
+- Never load fonts with external `<link>` tags (the Content-Security-Policy blocks them);
+  fonts are self-hosted in `priv/static/fonts/`
 - When creating or changing a reusable component, add it to `/dev/components` and to the
   components table
 - Every screen is listed in `docs/ui/screens.md` before it is built:
@@ -144,8 +146,9 @@ code-generation guide (React, `:root` variables, `bg-[var(--x)]`, Google Fonts l
 - The design file copies the design system from the code, never the opposite. Before the first
   designed screen, mirror it: variables named like the daisyUI variables, in `light` and `dark`
   modes (`color-primary`, `color-primary-content`, ..., `color-base-100`, `color-base-content`,
-  `radius-box`, `radius-field`, `radius-selector`, `font-sans`), with the values of
-  `assets/css/app.css` converted from oklch to hex; and a component library mirroring the
+  `radius-box`, `radius-field`, `radius-selector`, `font-sans` = Figtree,
+  `font-display` = Lato), with the values of `assets/css/app.css` converted from oklch to
+  hex; and a component library mirroring the
   components table, named `core/<component>` and `layouts/app`. Compare each library
   component with `/dev/components` using a `browser` node
 - Screens use only variables (never hex colors), library components, spacing in multiples

@@ -253,6 +253,13 @@ cp templates/docs/ui/design-system.md docs/ui/design-system.md
 sed "s/__APP_MODULE__/$app_module/g" templates/docs/ui/screens.md > docs/ui/screens.md
 cp templates/design/README.md design/README.md
 
+# fonts: Figtree (--font-sans) and Lato (--font-display), self-hosted, after the @source lines
+mkdir -p priv/static/fonts
+cp templates/fonts/*.woff2 templates/fonts/*-OFL.txt priv/static/fonts/
+last_source=$(grep -n '^@source' assets/css/app.css | tail -1 | cut -d: -f1)
+[[ -n "$last_source" ]] || die "Could not find where to add the fonts in assets/css/app.css."
+sed -i "${last_source}r templates/fonts/fonts.css" assets/css/app.css
+
 # Credo (make app.credo), Sobelow, mix_audit and mix_test_watch (make app.test.watch)
 perl -0pi -e 's/(  defp deps do\n    \[\n)/$1      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},\n      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},\n      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},\n      {:mix_test_watch, "~> 1.4", only: [:dev, :test], runtime: false},\n/' mix.exs
 grep -q '{:mix_audit,' mix.exs || die "Could not add the dev dependencies to mix.exs."

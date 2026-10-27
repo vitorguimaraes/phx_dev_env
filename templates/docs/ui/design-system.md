@@ -21,12 +21,14 @@ developer provides, and "Design system and screens" in `AGENTS.md` for the setup
 
 ## Typography
 
-- Families: <e.g. Inter (UI)>, self-hosted in `priv/static/fonts/`, set as `--font-sans` in `app.css`
+- Families (self-hosted in `priv/static/fonts/`, `@font-face` and `@theme` in `app.css`):
+  - Figtree (variable, 300 to 900, normal and italic): `--font-sans`, the interface and body text
+  - Lato (400 and 700): `--font-display` (`font-display` class), page and section titles only
 
 | Role | Classes |
 |---|---|
-| Page title | `text-xl font-semibold` |
-| Section title | `text-lg font-semibold` |
+| Page title | `font-display text-xl font-bold` |
+| Section title | `font-display text-lg font-bold` |
 | Body | `text-sm` |
 | Field label | `text-sm font-medium` |
 | Caption / help | `text-xs text-base-content/70` |

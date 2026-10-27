@@ -44,18 +44,16 @@ Run the migrations with the same image and variables: `docker run ... __APP__ /a
 <!-- db:end -->
 ## Design system
 
-Define it before building the first screen. The AI does the setup; you provide the identity:
+Define it before building the first screen. The fonts are already installed (Figtree for the
+interface and text, Lato for titles); the AI does the setup and you provide the colors:
 
 1. **Theme**: create a `light` and a `dark` theme in the
    [daisyUI theme generator](https://daisyui.com/theme-generator/) (colors, radius, sizes,
    border) and copy the CSS of each one
-2. **Font**: choose one family (optionally a second one for headings) in
-   [Google Fonts](https://fonts.google.com); prefer a variable font
-3. **Ask the AI**: "define the design system", pasting both themes and the font name.
-   It applies the theme to `assets/css/app.css`, checks the text contrast (asking before
-   changing any color), self-hosts the font, fills `docs/ui/design-system.md` and creates a
-   component gallery
-4. **Review** the gallery at
+2. **Ask the AI**: "define the design system", pasting both themes. It applies the theme to
+   `assets/css/app.css`, checks the text contrast (asking before changing any color), fills
+   `docs/ui/design-system.md` and creates a component gallery
+3. **Review** the gallery at
    [`localhost:__APP_HOST_PORT__/dev/components`](http://localhost:__APP_HOST_PORT__/dev/components)
    in light and dark mode, and ask for changes until you approve it
 
