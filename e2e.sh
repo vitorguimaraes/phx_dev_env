@@ -88,7 +88,7 @@ check "Lucide Tailwind plugin" bash -c '[[ -f assets/vendor/lucide.js && ! -e as
 check "generator templates with Lucide" grep -rq 'lucide-' priv/templates
 check "pt_BR default locale" grep -q 'default_locale: "pt_BR"' config/config.exs
 check "pt_BR Ecto errors" test -f priv/gettext/pt_BR/LC_MESSAGES/errors.po
-check "Credo and Sobelow in mix precommit" bash -c 'grep -q "\"credo\"," mix.exs && grep -q "\"sobelow --skip --exit low --ignore Vuln\"" mix.exs'
+check "Credo, Sobelow and mix_audit in mix precommit" bash -c 'grep -q "\"credo\"," mix.exs && grep -q "\"sobelow --skip --exit low --ignore Vuln\"" mix.exs && grep -q "\"deps.audit\"" mix.exs'
 check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"
 check "CSP nonce in the root layout" grep -q 'nonce={@csp_nonce}' "lib/${name}_web/components/layouts/root.html.heex"
 check "no template markers or placeholders left" bash -c \

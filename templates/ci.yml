@@ -47,4 +47,5 @@ jobs:
       - run: mix format --check-formatted
       - run: mix credo
       - run: mix sobelow --skip --exit low --ignore Vuln
+      - run: mix deps.audit
       - run: mix test

@@ -55,7 +55,7 @@ Then it:
 - adds a `commit-msg` hook that validates `<gitmoji> <type>(<scope>): <description>` messages;
 - sets `pt_BR` as the default locale, with the Ecto validation errors translated;
 - replaces Heroicons with [`Lucide`](https://lucide.dev/icons) icons, including the `mix phx.gen.*` generators (see `templates/icons/`);
-- adds [`credo`](https://github.com/rrrene/credo), [`sobelow`](https://github.com/nccgroup/sobelow) and [`mix_test_watch`](https://github.com/lpil/mix-test.watch) as dev/test dependencies, with Credo and Sobelow in `mix precommit`;
+- adds [`credo`](https://github.com/rrrene/credo), [`sobelow`](https://github.com/nccgroup/sobelow), [`mix_audit`](https://github.com/mirego/mix_audit) and [`mix_test_watch`](https://github.com/lpil/mix-test.watch) as dev/test dependencies, with Credo, Sobelow and `mix deps.audit` in `mix precommit`;
 - sets a Content-Security-Policy with a nonce per request (`templates/csp/`), so inline scripts run only with the nonce;
 - adds a GitHub Actions CI (`.github/workflows/ci.yml`) running the `mix precommit` checks on every push and pull request;
 - generates a production release image (`Dockerfile`, `mix phx.gen.release --docker`); the development image is `Dockerfile.dev`;
@@ -108,7 +108,7 @@ The `app.*` commands work both from the host (they run through `docker compose e
    run the tests and format the code. You can pass a file: `make app.test test/my_test.exs`
 
 - `make app.precommit`  
-   compile with warnings as errors, remove unused deps, format, run Credo, Sobelow and the tests (`mix precommit`). Run it before committing.
+   compile with warnings as errors, remove unused deps, format, run Credo, Sobelow, `mix deps.audit` and the tests (`mix precommit`). Run it before committing.
 
 - `make app.test.watch`  
    run the tests on file changes ([`mix_test_watch`](https://github.com/lpil/mix-test.watch)).

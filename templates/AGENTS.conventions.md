@@ -27,7 +27,8 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 
 - Commit at the end of each completed task, only after
   `docker exec __APP_CONTAINER__ mix precommit` passes. Never commit with failing checks.
-  It compiles with warnings as errors, formats, runs Credo, Sobelow and the tests
+  It compiles with warnings as errors, formats, runs Credo, Sobelow, `mix deps.audit`
+  (dependencies with known vulnerabilities; needs internet) and the tests
 - CI (`.github/workflows/ci.yml`) runs the same checks on every push and pull request;
   when adding a check to `mix precommit`, add it to the CI too
 - Make atomic commits: one logical change per commit; split independent changes
@@ -88,6 +89,8 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 
 - Fix the issues reported by Credo and Sobelow; **never** disable a check, add
   `# sobelow_skip` or change `.sobelow-skips` without asking the developer
+- When `mix deps.audit` reports a vulnerable dependency, update it (`mix deps.update <dep>`);
+  if there is no fixed version yet, tell the developer instead of ignoring it
 - The Content-Security-Policy is set by `__APP_WEB__/plugs/content_security_policy.ex`, with a
   new nonce per request. Inline scripts need `nonce={@csp_nonce}`; prefer code in
   `assets/js` (or LiveView colocated hooks) and **never** use inline event handlers

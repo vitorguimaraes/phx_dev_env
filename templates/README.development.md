@@ -16,7 +16,8 @@ Start the services and the server:
 - Or, from the host with `make` installed: `make up`, `make app.setup` and `make app`
 
 Visit [`localhost:__APP_HOST_PORT__`](http://localhost:__APP_HOST_PORT__) (`APP_HOST_PORT` in `.env`). Run `make app.precommit` before committing:
-it compiles with warnings as errors, formats the code and runs Credo, Sobelow and the tests.
+it compiles with warnings as errors, formats the code and runs Credo, Sobelow, `mix deps.audit`
+(dependencies with known vulnerabilities) and the tests.
 The CI (`.github/workflows/ci.yml`) runs the same checks on every push and pull request.
 
 Commit messages follow `<gitmoji> <type>(<scope>): <description>` and are validated by
