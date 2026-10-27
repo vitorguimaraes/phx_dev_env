@@ -345,19 +345,24 @@ if [[ "$use_auth" == y ]]; then
     fi
 fi
 
-# Content-Security-Policy in the browser pipeline (checked by Sobelow, which needs a single
-# string); 'unsafe-inline' is needed by the theme script in root.html.heex and the dev dashboards
-csp="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
-export SECURE_HEADERS="
-  # Content-Security-Policy of the browser pipeline; add an origin only when it is needed
-  @secure_headers %{
-    \"content-security-policy\" => \"$csp\"
-  }
-"
+# Content-Security-Policy with a nonce per request (see templates/csp)
+web_module="${app_module}Web"
+mkdir -p "lib/${project_name}_web/plugs" "test/${project_name}_web/plugs"
+sed "s/__APP_WEB_MODULE__/$web_module/g" templates/csp/content_security_policy.ex \
+    > "lib/${project_name}_web/plugs/content_security_policy.ex"
+sed "s/__APP_WEB_MODULE__/$web_module/g" templates/csp/content_security_policy_test.exs \
+    > "test/${project_name}_web/plugs/content_security_policy_test.exs"
+export CSP_PLUG="${web_module}.Plugs.ContentSecurityPolicy"
 router="lib/${project_name}_web/router.ex"
-perl -0pi -e 's/^(  use \S+, :router\n)/$1$ENV{SECURE_HEADERS}/m; s/plug :put_secure_browser_headers\n/plug :put_secure_browser_headers, \@secure_headers\n/' "$router"
-grep -q 'put_secure_browser_headers, @secure_headers' "$router" \
+perl -0pi -e 's/^(  pipeline :browser do\n)/  # Sobelow only finds a Content-Security-Policy given to put_secure_browser_headers;\n  # it is set by Plugs.ContentSecurityPolicy, with a nonce per request\n  # sobelow_skip ["Config.CSP"]\n$1/m; s/(    plug :put_secure_browser_headers\n)/$1    plug $ENV{CSP_PLUG}\n/; s/(live_dashboard "\/dashboard", metrics: \S+)\n/$1,\n        csp_nonce_assign_key: :csp_nonce\n/; s/(forward "\/mailbox", Plug.Swoosh.MailboxPreview)\n/$1,\n        csp_nonce_assign_key: %{script: :csp_nonce, style: :csp_nonce}\n/' "$router"
+grep -q "plug $CSP_PLUG" "$router" && grep -q 'sobelow_skip \["Config.CSP"\]' "$router" \
+    && grep -q 'csp_nonce_assign_key: :csp_nonce' "$router" \
     || die "Could not add the Content-Security-Policy to $router."
+root_layout="lib/${project_name}_web/components/layouts/root.html.heex"
+sed -i 's/^    <script>$/    <script nonce={@csp_nonce}>/' "$root_layout"
+if grep -E '<script' "$root_layout" | grep -v ' src=' | grep -qv 'nonce='; then
+    die "Inline scripts without the CSP nonce in $root_layout."
+fi
 
 # production image (Dockerfile; the development one is Dockerfile.dev) and release scripts
 docker compose run --rm --no-deps app_service sh -c "mix phx.gen.release --docker" </dev/null

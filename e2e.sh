@@ -30,6 +30,7 @@ if [[ "$use_auth" == y ]]; then run_flags+=(--auth); else run_flags+=(--no-auth)
 
 id=$(date +%s)
 name="e2e_$id"
+module="E2e$id"
 work=$(mktemp -d)
 # unique folder name: compose names the project (network, volumes) after it
 template="$work/e2e_template_$id"
@@ -88,7 +89,8 @@ check "generator templates with Lucide" grep -rq 'lucide-' priv/templates
 check "pt_BR default locale" grep -q 'default_locale: "pt_BR"' config/config.exs
 check "pt_BR Ecto errors" test -f priv/gettext/pt_BR/LC_MESSAGES/errors.po
 check "Credo and Sobelow in mix precommit" bash -c 'grep -q "\"credo\"," mix.exs && grep -q "\"sobelow --skip --exit low --ignore Vuln\"" mix.exs'
-check "Content-Security-Policy in the router" grep -q 'put_secure_browser_headers, @secure_headers' "lib/${name}_web/router.ex"
+check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"
+check "CSP nonce in the root layout" grep -q 'nonce={@csp_nonce}' "lib/${name}_web/components/layouts/root.html.heex"
 check "no template markers or placeholders left" bash -c \
     '! grep -rqE "(db|auth):(start|end)|__[A-Z_]+__" .env .env.example docker-compose.yaml makefile AGENTS.md README.md .github'
 check "AGENTS.md conventions and CLAUDE.md" bash -c 'grep -q "^## Development environment (Docker)" AGENTS.md && grep -qx "@AGENTS.md" CLAUDE.md'
@@ -141,10 +143,28 @@ for _ in $(seq 60); do
     sleep 2
 done
 check "home page responds 200" bash -c "[[ \$(curl -s -o /dev/null -w '%{http_code}' $url) == 200 ]]"
-check "Content-Security-Policy header" bash -c "curl -sI $url | grep -qi '^content-security-policy: default-src'"
+# every inline script has the nonce of the response header and there are no inline handlers
+csp_page_ok() {
+    local headers body nonce
+    headers=$(mktemp)
+    body=$(mktemp)
+    curl -sL -D "$headers" -o "$body" "$url$1"
+    nonce=$(grep -i '^content-security-policy:' "$headers" | tail -1 | grep -oE "'nonce-[A-Za-z0-9_-]+'" | cut -d- -f2- | tr -d "'")
+    [[ -n "$nonce" ]] \
+        && ! grep -oE '<script[^>]*>' "$body" | grep -v ' src=' | grep -qv "nonce=\"$nonce\"" \
+        && ! grep -qiE '<[^>]+[[:space:]]on[a-z]+=' "$body"
+    local ok=$?
+    rm -f "$headers" "$body"
+    return $ok
+}
+check "CSP nonce on the home page" csp_page_ok /
+check "CSP nonce on the LiveDashboard" csp_page_ok /dev/dashboard
+check "CSP nonce on the mailbox preview" csp_page_ok /dev/mailbox
+check "CSP without unsafe-inline scripts" bash -c "! curl -sI $url | grep -i '^content-security-policy:' | grep -q \"script-src[^;]*unsafe-inline\""
 check "app.css has the Lucide icons" bash -c "curl -s $url/assets/css/app.css | grep -q 'lucide-'"
 if [[ "$use_auth" == y ]]; then
     check "log in page responds 200" bash -c "[[ \$(curl -s -o /dev/null -w '%{http_code}' $url/users/log-in) == 200 ]]"
+    check "CSP nonce on the log in page" csp_page_ok /users/log-in
 fi
 
 if [[ "$build_release" == y ]]; then
