@@ -51,12 +51,14 @@ interface and text, Lato for titles); the AI does the setup and you provide the 
    [daisyUI theme generator](https://daisyui.com/theme-generator/) (colors, radius, sizes,
    border) and copy the CSS of each one
 2. **Ask the AI**: "define the design system", pasting both themes. It applies the theme to
-   `assets/css/app.css`, checks the text contrast (asking before changing any color), fills
+   `assets/css/app.css`, measures the text contrast (asking before changing any color), fills
    `docs/ui/design-system.md` and creates a component gallery
 3. **Review** the gallery at
    [`localhost:__APP_HOST_PORT__/dev/components`](http://localhost:__APP_HOST_PORT__/dev/components)
-   in light and dark mode, and ask for changes until you approve it
+   in light and dark mode, and ask for changes until you approve it; then the AI marks the
+   design system as `defined`
 
 Then list the screens in `docs/ui/screens.md`. Mark `Design: required` only for screens whose
 look needs to be decided first (they are designed in `design/app.pen` with pen.dev, see
-`design/README.md`); the others are built directly from the specs and reviewed in the browser.
+`design/README.md`); the others are built directly from the specs, and you mark them as
+`reviewed` after checking them in the browser.

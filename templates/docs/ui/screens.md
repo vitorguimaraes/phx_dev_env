@@ -3,8 +3,10 @@
 Every screen is listed here before it is built (see "Design system and screens" in `AGENTS.md`).
 
 - Design: `none` (built directly from the specs) or `required` (designed in `design/app.pen` first)
-- Status: `specified` → `designed` → `approved` (set by the developer only) → `implemented`
-  (screens with `Design: none` go from `specified` to `implemented`)
+- Status with `Design: required`: `specified` → `designed` → `approved` (set by the developer
+  only) → `implemented`
+- Status with `Design: none`: `specified` → `implemented` → `reviewed` (set by the developer
+  only, after checking it in the browser)
 
 ## <Screen name>
 

@@ -112,15 +112,22 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
   first UI task is the design system setup, and no screen is built before it:
   1. The developer provides the `light` and `dark` themes from the daisyUI theme generator
   2. Replace only the variables inside the `light` and `dark` theme blocks of
-     `assets/css/app.css`; keep the block names and the plugin path
-  3. Measure the contrast of every pair in the document's table, in both themes; when a pair
-     is below 4.5:1, propose a close shade that passes and ask before changing it
+     `assets/css/app.css`; keep the block names, the flags (`default`, `prefersdark`,
+     `color-scheme`) and the plugin path
+  3. Measure the contrast of every pair in the document's table, in both themes, with a script:
+     convert the oklch colors to sRGB and compute the WCAG ratio (for `base-content/70`, blend
+     it over the background first); never estimate by eye. When a pair is below 4.5:1, propose
+     a close shade that passes and ask before changing it
   4. The fonts are already installed: Figtree (`--font-sans`) and Lato (`--font-display`) in
      `priv/static/fonts/` and `app.css`. Do not add or replace fonts without asking
-  5. Fill the typography roles, spacing, radius, icons and components sections
+  5. Fill the identity, contrast values, spacing, icons and components sections, and align the
+     titles of the existing components (e.g. the `<h1>` of `<.header>`) with the typography roles
   6. Create a dev-only `/dev/components` LiveView (next to `/dev/dashboard` in the
      `dev_routes` scope) showing every component, text role, theme color and icon size
-  7. Set the status to `defined`, run `mix precommit` and commit (`🎨 style: define design system`)
+  7. Run `mix precommit`, commit (`🎨 style: set up design system`) and ask the developer to
+     review `/dev/components` in light and dark mode. Apply the requested changes; only when
+     the developer approves it, set the status to `defined` and commit
+     (`📝 docs(ui): approve design system`)
 - Use only the typography roles of the document, never ad hoc text sizes
 - Text contrast is at least 4.5:1; after changing a theme color, measure again and update the table
 - Use `font-display` only for page and section titles; everything else uses the default
@@ -130,8 +137,8 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - When creating or changing a reusable component, add it to `/dev/components` and to the
   components table
 - Every screen is listed in `docs/ui/screens.md` before it is built:
-  - `Design: none`: build it from the specs and the screen entry; the developer reviews it in
-    the browser
+  - `Design: none`: build it from the specs and the screen entry, set it to `implemented` and
+    ask the developer to review it in the browser; only the developer sets `reviewed`
   - `Design: required`: design it first (see "Design (pen.dev)"); only the developer sets
     `approved`, and only approved screens are implemented
   - Keep the status up to date
@@ -139,8 +146,9 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 ## Design (pen.dev)
 
 Screens with `Design: required` are designed in `design/app.pen` with the pen.dev MCP tools
-(the file must be open in VS Code with the Pencil extension; if the tools say no file is open,
-ask the developer to reconnect the MCP with `/mcp`). These rules override pen.dev's own
+(the file must be open in VS Code with the Pencil extension; if it does not exist yet, ask the
+developer to create it with Pencil; if the tools say no file is open, ask the developer to
+reconnect the MCP with `/mcp`). These rules override pen.dev's own
 code-generation guide (React, `:root` variables, `bg-[var(--x)]`, Google Fonts links)
 
 - The design file copies the design system from the code, never the opposite. Before the first

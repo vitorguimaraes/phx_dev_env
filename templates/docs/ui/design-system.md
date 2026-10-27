@@ -1,6 +1,6 @@
 # Design system
 
-Status: not defined   <!-- not defined | defined -->
+Status: not defined   <!-- not defined | defined (only after the developer approves /dev/components) -->
 
 Defined by the first UI task of the project: see "Design system" in `README.md` for what the
 developer provides, and "Design system and screens" in `AGENTS.md` for the setup steps.
@@ -15,6 +15,7 @@ developer provides, and "Design system and screens" in `AGENTS.md` for the setup
 | Pair | Light | Dark |
 |---|---|---|
 | `base-content` on `base-100` / `base-200` / `base-300` | | |
+| `base-content/70` (captions) on `base-100` / `base-200` | | |
 | `primary-content` on `primary` (same for secondary, accent, neutral) | | |
 | `info` / `success` / `warning` / `error` on `base-100` | | |
 | `<color>-content` on `<color>` for info, success, warning, error | | |
