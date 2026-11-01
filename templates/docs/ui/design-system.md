@@ -2,12 +2,14 @@
 
 Status: not defined   <!-- not defined | defined (only after the developer approves /dev/components) -->
 
-Defined by the first UI task of the project: see "Design system" in `README.md` for what the
+Defined by the first UI task of the project: see "1. Design system" in `README.md` for what the
 developer provides, and "Design system and screens" in `AGENTS.md` for the setup steps.
 
 ## Theme
 
 - Source: `assets/css/app.css` (daisyUI themes `light` and `dark`)
+- Generator export: `design/themes/light.css` and `design/themes/dark.css` (the starting point;
+  later fixes are made only in `app.css`)
 - Identity: <short description of the brand and of each color's role>
 
 ### Contrast (WCAG: at least 4.5:1 for text)

@@ -17,11 +17,20 @@ The project uses:
 - Shell script
 ## Getting started
 
+To create the project:
+
 - Install [`docker`](https://docs.docker.com/engine/install/) and [`docker compose`](https://docs.docker.com/compose/install/)
-- Optionally install `make`, to run the [makefile commands](#5-makefile-commands) from the host (`sudo apt install make` on Ubuntu)
+- Optionally install `make`, to run the [makefile commands](#7-makefile-commands) from the host (`sudo apt install make` on Ubuntu)
 
 > On Ubuntu, `run.sh` installs Docker automatically if it is not installed (see [`docker.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker.sh)).  
 > On other systems, install Docker manually before running it.
+
+To build the application (see [step 6](#6-build-the-application)):
+
+- [Claude Code](https://claude.com/claude-code), the AI agent that follows the project conventions
+- Optionally the [`gh`](https://cli.github.com/) CLI, to create the GitHub repository and keep specs and tickets in GitHub issues
+- [VS Code](https://code.visualstudio.com/) with the Pencil extension of [pen.dev](https://pen.dev), only for screens that are designed before being built
+- Only for the BMAD Method: Node.js 20.12+, Python 3.10+ and [uv](https://docs.astral.sh/uv/)
 
 ## How to run
 
@@ -33,6 +42,7 @@ In your terminal use `git` to clone the repository locally.
 ### 2. Setup your project variables in `.env`
 
 In `.env` you can setup your postgres variables and some variables used in [`docker-compose.yaml`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker-compose.yaml).
+The defaults work as they are: `run.sh` sets the names, ports and user ids by itself.
 
 ### 3. Run the shell script
 
@@ -62,7 +72,8 @@ Then it:
 - names the containers, image and network after the project and picks free host ports, so several projects can run at the same time (the ports are registered in `~/.config/phx_dev_env/projects`, so a stopped project keeps its ports);
 - installs the Figtree (interface and text) and Lato (titles) fonts, self-hosted (see `templates/fonts/`);
 - adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `design/` for [`pen.dev`](https://pen.dev) designs;
-- appends development instructions to the project's `README.md`;
+- adds the `/screens` skill for Claude Code (`.claude/skills/screens/`), which turns the user stories of a spec into screens;
+- appends development instructions, including the application building steps, to the project's `README.md`;
 - starts a new git repository.
 
 If Docker is installed by the script, log out and log in again (to apply the `docker` group), then run `./run.sh` again.  
@@ -86,7 +97,37 @@ Or, if you have `make` installed, do the same from the host (first time only for
 
 Visit `http://localhost:<APP_HOST_PORT>` (shown at the end of `run.sh` and defined in `.env`, default `4000`) and check Phoenix page.  
 
-### 5. Makefile commands
+### 5. Publish on GitHub
+
+`run.sh` starts the git repository without commits. Make the first commit and push it, so the CI runs on every push:
+
+> git add .  
+> git commit -m "🔧 chore: create the project"
+
+With the `gh` CLI (logged in with `gh auth login`):
+> gh repo create <project_name> --private --source . --push
+
+Or create an empty repository on GitHub (without README, license or `.gitignore`) and push to it:
+> git remote add origin git@github.com:<user>/<project_name>.git  
+> git push -u origin HEAD
+
+The first CI run takes a few minutes (the next ones use the cache); see it in the repository's Actions tab.
+
+### 6. Build the application
+
+The application is built with Claude Code, opened in the project's folder, in seven steps. They are detailed in "Building the application" in the project's `README.md` (from [`templates/README.development.md`](templates/README.development.md)):
+
+1. **Design system** (once, before the first screen): you create a light and a dark theme in the [daisyUI theme generator](https://daisyui.com/theme-generator/), save them in `design/themes/` and ask the AI to define the design system; it applies them, measures the contrast and creates a component gallery for you to approve
+2. **Domain**: an interview that records the feature's vocabulary in `GLOSSARY.md` and its decisions in `docs/adr/`
+3. **Spec**: the problem, the solution and the numbered user stories
+4. **Screens**: `/screens <spec>` completes the Given/When/Then acceptance criteria and lists the screens in `docs/ui/screens.md` (and the flow in `docs/ui/flows/`, for two or more screens); you decide which ones are designed first
+5. **Design**: those screens are designed in `design/app.pen` with pen.dev, and you approve them
+6. **Tickets**: the spec is split into vertical slices
+7. **Implementation and review**: test-driven, with `make app.precommit` before each commit and a review of each screen
+
+Steps 2, 3, 6 and 7 use one of two methods: the [Matt Pocock skills](https://github.com/mattpocock/skills) (lighter, recommended) or the [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) (more roles and documents, for bigger projects). Steps 1, 4 and 5 are the same for both.
+
+### 7. Makefile commands
 
 The `app.*` commands work both from the host (they run through `docker compose exec`) and inside the app container.
 
@@ -117,7 +158,7 @@ The `app.*` commands work both from the host (they run through `docker compose e
 - `make app.credo`  
    run [`Credo`](https://github.com/rrrene/credo) in strict mode.
 
-### 6. Testing the template
+### 8. Testing the template
 
 `e2e.sh` tests `run.sh` end to end: it creates a project from a temporary copy of this folder (including uncommitted changes), checks the generated files, runs `mix setup`, `mix precommit` and the server in the real containers, and removes everything at the end.
 
@@ -126,7 +167,7 @@ The `app.*` commands work both from the host (they run through `docker compose e
 > ./e2e.sh --no-ecto  
 > ./e2e.sh --keep          # keep the project to inspect it
 
-### 7. Connecting in DBeaver
+### 9. Connecting in DBeaver
 
 Host: `localhost`  
 Port: DB_HOST_PORT defined in `.env` (default `6032`; only reachable from your machine)  
@@ -134,7 +175,7 @@ Database: POSTGRES_DB defined in `.env`
 Username: POSTGRES_USER defined in `.env`  
 Password: POSTGRES_PASSWORD defined in `.env`  
 
-### 8. Managing images and containers
+### 10. Managing images and containers
 
 - `docker compose up -d`  
    up services.

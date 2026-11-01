@@ -42,23 +42,138 @@ docker run --rm -p 8080:4000 -e PHX_HOST=localhost \
 Run the migrations with the same image and variables: `docker run ... __APP__ /app/bin/migrate`.
 
 <!-- db:end -->
-## Design system
+## Building the application
 
-Define it before building the first screen. The fonts are already installed (Figtree for the
-interface and text, Lato for titles); the AI does the setup and you provide the colors:
+The application is built with an AI agent (Claude Code) in the steps below. Step 1 is done
+once, before the first screen; steps 2 to 7 repeat for each feature.
 
-1. **Theme**: create a `light` and a `dark` theme in the
-   [daisyUI theme generator](https://daisyui.com/theme-generator/) (colors, radius, sizes,
-   border) and copy the CSS of each one
-2. **Ask the AI**: "define the design system", pasting both themes. It applies the theme to
-   `assets/css/app.css`, measures the text contrast (asking before changing any color), fills
-   `docs/ui/design-system.md` and creates a component gallery
-3. **Review** the gallery at
+| Step | Result | Matt Pocock skills | BMAD Method |
+|---|---|---|---|
+| 1. Design system | themes in `app.css`, `docs/ui/design-system.md`, `/dev/components` | ask the AI | ask the AI |
+| 2. Domain | `GLOSSARY.md`, `docs/adr/` | `/grill-with-docs` | product brief, architecture |
+| 3. Spec | user stories | `/to-spec` | PRD, epics and stories |
+| 4. Screens | `docs/ui/screens.md`, `docs/ui/flows/` | `/screens` | `/screens` |
+| 5. Design | `design/app.pen` | pen.dev or `/prototype` | pen.dev |
+| 6. Tickets | vertical slices of work | `/to-tickets` | the stories of step 3 |
+| 7. Implementation | code, tests and review | `/tdd`, `/implement-spec`, `/code-review` | story development, code review |
+
+### Tools
+
+- **Claude Code**, opened in the project folder. `CLAUDE.md` imports `AGENTS.md` (the project
+  conventions, including how to run commands in the container), and the `/screens` skill
+  is in `.claude/skills/`
+- **One method** for the steps 2, 3, 6 and 7:
+  - **Matt Pocock skills** (lighter, recommended): in Claude Code, run
+    `/plugin install mattpocock-skills@claude-plugins-official`, then
+    `/setup-matt-pocock-skills` once in the project to choose where specs and tickets are kept
+    (GitHub issues, with the `gh` CLI logged in, or local files)
+  - **BMAD Method** (more roles and documents, for bigger projects): run
+    `npx bmad-method install` in the project folder, on the host (it needs Node.js 20.12+,
+    Python 3.10+ and [uv](https://docs.astral.sh/uv/)). Skill names change between BMAD
+    versions: ask `bmad-help` which one runs each step
+- **pen.dev**: VS Code with the Pencil extension, only for screens with `Design: required`
+  (see `design/README.md`)
+- **Web Design Guidelines** (optional): `npx skills add vercel-labs/agent-skills --skill
+  web-design-guidelines`, to review the screens for accessibility and usability. Its rules
+  are generic (some are about React): apply only what fits
+
+### 1. Design system
+
+Once, before the first screen (it can be done while steps 2 and 3 run). The fonts are already
+installed (Figtree for the interface and text, Lato for titles); you choose the colors and
+shapes, and the AI does the setup.
+
+1. Open the [daisyUI theme generator](https://daisyui.com/theme-generator/). The project uses
+   daisyUI 5, and the generator exports daisyUI 5 themes
+2. **Light theme**: pick a light theme as the starting point and adjust the colors (base,
+   primary, secondary, accent, neutral, info, success, warning and error, each with its
+   content color), the radius (boxes, fields and selectors), the sizes, the border and the
+   effects (depth and noise). Name it `light`
+3. Copy its CSS (`Copy to clipboard` in "Add theme to your CSS file") and save it as
+   `design/themes/light.css`
+4. **Dark theme**: start from a dark theme, keep the radius, sizes, border and effects of the
+   light one (only the colors change), name it `dark` and save its CSS as
+   `design/themes/dark.css`
+5. Ask the AI: "define the design system with the themes in `design/themes`". It copies the
+   variables to `assets/css/app.css` (you do not edit it), measures the text contrast (asking
+   before changing any color), fills `docs/ui/design-system.md`, creates the component
+   gallery and commits
+6. Review the gallery at
    [`localhost:__APP_HOST_PORT__/dev/components`](http://localhost:__APP_HOST_PORT__/dev/components)
    in light and dark mode, and ask for changes until you approve it; then the AI marks the
-   design system as `defined`
+   design system as `defined` and commits
 
-Then list the screens in `docs/ui/screens.md`. Mark `Design: required` only for screens whose
-look needs to be decided first (they are designed in `design/app.pen` with pen.dev, see
-`design/README.md`); the others are built directly from the specs, and you mark them as
-`reviewed` after checking them in the browser.
+The generator keeps your themes only in the browser, so the files in `design/themes/` are the
+record of what was exported. After the setup, `app.css` is the source of truth: ask the AI for
+later color changes, or export new themes and repeat steps 5 and 6.
+
+### 2. Domain
+
+Settle the vocabulary and the decisions of the feature before writing requirements.
+
+- **Matt Pocock**: `/grill-with-docs <the feature idea>`. The AI interviews you in rounds; each
+  question comes with a recommended answer (reply "yes" to accept it, or correct it). The
+  terms go to `GLOSSARY.md` and the decisions to `docs/adr/`
+- **BMAD**: the product brief (and the PRD, for a new product) describe the problem, and the
+  architecture document records the technical decisions
+
+### 3. Spec
+
+The result is a spec with numbered user stories ("As a <user>, I want <feature>, so that
+<benefit>").
+
+- **Matt Pocock**: `/to-spec` in the same conversation. It does not interview you again: it
+  writes the problem, the solution, the user stories and the implementation and testing
+  decisions, and publishes them where you chose in the setup
+- **BMAD**: the PRD is split into epics and stories
+- **By hand**: a file in `docs/specs/` with the stories also works
+
+### 4. Screens
+
+`/screens <spec>` (a file, an issue number or a story file). The AI:
+
+1. Completes the Given/When/Then acceptance criteria of every story with a user interface
+   (main path, empty state and errors), asking you about what the spec does not say
+2. Proposes the screens (one per route), shows which stories each one covers and recommends
+   `Design: required` or `none` for each; you decide
+3. After your confirmation, writes the entries in `docs/ui/screens.md` (status `specified`)
+   and, when there are two or more screens, the flow in `docs/ui/flows/` (places, actions and
+   a diagram)
+
+With BMAD, skip its UX design workflow: the design system and this step replace it, so there
+is a single source of truth for the screens.
+
+### 5. Design
+
+Only for screens with `Design: required`:
+
+1. The first time, create `design/app.pen` with the Pencil extension in VS Code and keep it
+   open (see `design/README.md`)
+2. Ask the AI: "design the screen <name>". The first time, it copies the design system to the
+   design file (variables and components); then it draws the mobile and desktop versions,
+   with real text and the empty and error states, and sets the status to `designed`
+3. Review it in VS Code and ask for changes; when it is right, set the status to `approved`
+   in `docs/ui/screens.md`. Only approved screens are implemented
+
+For a screen with `Design: none` whose layout is unclear, `/prototype` (Matt Pocock) builds a
+few variations on a throwaway route, so you can pick one in the browser.
+
+### 6. Tickets
+
+- **Matt Pocock**: `/to-tickets <spec>` splits the spec into vertical slices (schema, context,
+  LiveView and tests), each with the tickets that block it
+- **BMAD**: the stories of step 3 are the tickets; its sprint planning orders them
+
+Tickets that build a screen point to its entry in `docs/ui/screens.md`.
+
+### 7. Implementation and review
+
+- **Matt Pocock**: `/tdd <ticket>` for one ticket, or `/implement-spec <spec>` for the whole
+  spec (subagents in parallel, on an integration branch); `/code-review` before merging
+- **BMAD**: its development workflow for each story, then its code review
+
+In every case, each acceptance criterion gets a LiveView test, `make app.precommit` passes
+before each commit, and the screen goes to `implemented`. Check the screens with
+`Design: none` in the browser and mark them as `reviewed` (optionally after
+`/web-design-guidelines lib/__APP___web/live`). Push to run the CI, then start the next
+feature at step 2.

@@ -1,5 +1,9 @@
 # Design
 
+`themes/light.css` and `themes/dark.css` hold the themes exported from the
+[daisyUI theme generator](https://daisyui.com/theme-generator/) for the design system setup
+(see "Building the application" in `README.md`).
+
 Screens marked `Design: required` in `docs/ui/screens.md` are designed in `design/app.pen`
 with [pen.dev](https://pen.dev).
 
