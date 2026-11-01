@@ -5,8 +5,8 @@
 
 # Phoenix Development Environment
 
-Set up your environment without install Elixir and Phoenix locally.
-By this way, you don't need to download, install and configure dependencies or create and build a Docker image manually by yourself to start developing a new project.
+Set up your environment without installing Elixir and Phoenix locally.
+This way, you don't need to download, install and configure dependencies or create and build a Docker image manually by yourself to start developing a new project.
 
 ## Technologies
 
@@ -15,6 +15,14 @@ The project uses:
 - Docker
 - Docker compose
 - Shell script
+
+The generated project uses:
+
+- Elixir and Phoenix, with LiveView
+- PostgreSQL (optional, with Ecto)
+- Tailwind CSS and daisyUI
+- GitHub Actions
+
 ## Getting started
 
 To create the project:
@@ -71,7 +79,7 @@ Then it:
 - generates a production release image (`Dockerfile`, `mix phx.gen.release --docker`); the development image is `Dockerfile.dev`;
 - names the containers, image and network after the project and picks free host ports, so several projects can run at the same time (the ports are registered in `~/.config/phx_dev_env/projects`, so a stopped project keeps its ports);
 - installs the Figtree (interface and text) and Lato (titles) fonts, self-hosted (see `templates/fonts/`);
-- adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `design/` for [`pen.dev`](https://pen.dev) designs;
+- adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `design/` for [`pen.dev`](https://pen.dev) designs (with `design/themes/` for the daisyUI theme export);
 - adds the `/screens` skill for Claude Code (`.claude/skills/screens/`), which turns the user stories of a spec into screens;
 - appends development instructions, including the application building steps, to the project's `README.md`;
 - starts a new git repository.
@@ -85,9 +93,8 @@ Go to the project's folder, start the services and open a shell in the app conta
 > cd ../<project_name>  
 > ./scripts/dev.sh
 
-Inside the container, get the dependencies, create the database (only if using Ecto) and start the server  
-> mix deps.get  
-> mix ecto.create  
+Inside the container, get the dependencies, create the database (only if using Ecto), build the assets and start the server  
+> make app.setup  
 > make app
 
 Or, if you have `make` installed, do the same from the host (first time only for `make app.setup`)  
