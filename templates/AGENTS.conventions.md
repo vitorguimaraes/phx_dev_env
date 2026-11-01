@@ -106,14 +106,37 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
   authentication translates them to Portuguese with `gettext` (see "Language")
 <!-- auth:end -->
 
+## Domain, specs and screens
+
+- `GLOSSARY.md`, when it exists, is the source of the domain terms: use them in the names of
+  contexts, schemas and functions. When a new term appears, or one conflicts with the
+  glossary, ask the developer before using it and record the answer there. Architectural
+  decisions go in `docs/adr/`
+- Every screen comes from the user stories of a spec (an issue or a file in `docs/`). Before
+  adding a screen to `docs/ui/screens.md`, find its spec; when there is none, ask the
+  developer instead of inventing requirements
+- List the screens of a spec with the `screens` skill (`.claude/skills/screens/SKILL.md`;
+  agents without skills follow that file):
+  - every story with a user interface has Given/When/Then acceptance criteria for the main
+    path and, when they can happen, the empty and error states
+  - specs with two or more screens get a flow in `docs/ui/flows/<spec-slug>.md`
+  - the developer decides which screens are `Design: required`
+- Tickets that build a screen point to its entry in `docs/ui/screens.md`
+- Every acceptance criterion of a screen has a LiveView test
+
 ## Design system and screens
 
 - Before any UI work, read `docs/ui/design-system.md`. While its status is `not defined`, the
   first UI task is the design system setup, and no screen is built before it:
-  1. The developer provides the `light` and `dark` themes from the daisyUI theme generator
-  2. Replace only the variables inside the `light` and `dark` theme blocks of
+  1. The developer exports the `light` and `dark` themes from the daisyUI theme generator to
+     `design/themes/light.css` and `design/themes/dark.css` (when they are pasted in the chat,
+     save them there first)
+  2. Copy only the variables of each file into the matching theme block of
      `assets/css/app.css`; keep the block names, the flags (`default`, `prefersdark`,
-     `color-scheme`) and the plugin path
+     `color-scheme`) and the plugin path (`daisyui/packages/bundle/daisyui-theme`, not the
+     generator's `daisyui/theme`). When a file has a variable that the blocks do not have, ask
+     before adding it. From then on `app.css` is the source of truth: later color fixes are
+     made only there
   3. Measure the contrast of every pair in the document's table, in both themes, with a script:
      convert the oklch colors to sRGB and compute the WCAG ratio (for `base-content/70`, blend
      it over the background first); never estimate by eye. When a pair is below 4.5:1, propose

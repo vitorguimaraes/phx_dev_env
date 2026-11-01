@@ -248,10 +248,15 @@ cat README.development.md.tmp >> README.md
 rm README.development.md.tmp
 
 # design system, screen inventory and pen.dev design folder
-mkdir -p docs/ui design
+mkdir -p docs/ui design/themes
+touch design/themes/.gitkeep
 cp templates/docs/ui/design-system.md docs/ui/design-system.md
 sed "s/__APP_MODULE__/$app_module/g" templates/docs/ui/screens.md > docs/ui/screens.md
 cp templates/design/README.md design/README.md
+
+# /screens skill: from the user stories of a spec to docs/ui/screens.md
+mkdir -p .claude/skills/screens
+sed "s/__APP_MODULE__/$app_module/g" templates/skills/screens/SKILL.md > .claude/skills/screens/SKILL.md
 
 # fonts: Figtree (--font-sans) and Lato (--font-display), self-hosted, after the @source lines
 mkdir -p priv/static/fonts
