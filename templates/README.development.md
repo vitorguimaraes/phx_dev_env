@@ -53,15 +53,15 @@ once, before the first screen; steps 2 to 7 repeat for each feature.
 | 2. Domain | `GLOSSARY.md`, `docs/adr/` | `/grill-with-docs` | product brief, architecture |
 | 3. Spec | user stories | `/to-spec` | PRD, epics and stories |
 | 4. Screens | `docs/ui/screens.md`, `docs/ui/flows/` | `/screens` | `/screens` |
-| 5. Design | approved screens | ask the AI | ask the AI |
+| 5. Prototype | approved prototypes in `/dev/prototypes` | `/prototype-screen` | `/prototype-screen` |
 | 6. Tickets | vertical slices of work | `/to-tickets` | the stories of step 3 |
 | 7. Implementation | code, tests and review | `/tdd`, `/implement-spec`, `/code-review` | story development, code review |
 
 ### Tools
 
 - **Claude Code**, opened in the project folder. `CLAUDE.md` imports `AGENTS.md` (the project
-  conventions, including how to run commands in the container), and the `/screens` skill
-  is in `.claude/skills/`
+  conventions, including how to run commands in the container), and the `/screens` and
+  `/prototype-screen` skills are in `.claude/skills/`
 - **One method** for the steps 2, 3, 6 and 7:
   - **Matt Pocock skills** (lighter, recommended): in Claude Code, run
     `/plugin install mattpocock-skills@claude-plugins-official`, then
@@ -133,7 +133,7 @@ The result is a spec with numbered user stories ("As a <user>, I want <feature>,
 1. Completes the Given/When/Then acceptance criteria of every story with a user interface
    (main path, empty state and errors), asking you about what the spec does not say
 2. Proposes the screens (one per route), shows which stories each one covers and recommends
-   `Design: required` or `none` for each; you decide
+   `Prototype: required` or `none` for each; you decide
 3. After your confirmation, writes the entries in `docs/ui/screens.md` (status `specified`)
    and, when there are two or more screens, the flow in `docs/ui/flows/` (places, actions and
    a diagram)
@@ -141,11 +141,21 @@ The result is a spec with numbered user stories ("As a <user>, I want <feature>,
 With BMAD, skip its UX design workflow: the design system and this step replace it, so there
 is a single source of truth for the screens.
 
-### 5. Design
+### 5. Prototype
 
-Only for screens with `Design: required`: ask the AI to build the screen, review it in the
-browser and ask for changes; when it is right, set the status to `approved` in
-`docs/ui/screens.md`. Only approved screens are implemented.
+Only for screens with `Prototype: required`. `/prototype-screen <screen>` (its name or route):
+
+1. The AI builds the screen with fake data under `/dev/prototypes`, with one state per
+   acceptance criterion (filled, empty, error...), and sets its status to `prototyped`
+2. Open the links it gives you (the list is at
+   [`localhost:__APP_HOST_PORT__/dev/prototypes`](http://localhost:__APP_HOST_PORT__/dev/prototypes)):
+   the toolbar at the bottom switches the states and the theme, and "Mobile and desktop" shows
+   the screen at both sizes. Ask for changes until it is right
+3. Set its status to `approved` in `docs/ui/screens.md`. The AI then moves the markup to a
+   function component in `lib/__APP___web/components/`, which the real LiveView will render
+   with the real data; the prototype stays as the catalog of the screen's states
+
+Only approved screens are implemented.
 
 ### 6. Tickets
 
@@ -162,7 +172,7 @@ Tickets that build a screen point to its entry in `docs/ui/screens.md`.
 - **BMAD**: its development workflow for each story, then its code review
 
 In every case, each acceptance criterion gets a LiveView test, `make app.precommit` passes
-before each commit, and the screen goes to `implemented`. Check the screens with
-`Design: none` in the browser and mark them as `reviewed` (optionally after
+before each commit, and the screen goes to `implemented`. Check each implemented screen in
+the browser and mark it as `reviewed` (optionally after
 `/web-design-guidelines lib/__APP___web/live`). Push to run the CI, then start the next
 feature at step 2.

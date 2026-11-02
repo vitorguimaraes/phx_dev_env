@@ -3,11 +3,13 @@
 Every screen comes from the user stories of a spec and is listed here before it is built (see
 "Domain, specs and screens" and "Design system and screens" in `AGENTS.md`).
 
-- Design: `none` (built directly from the specs) or `required` (its look is decided and approved before it is built)
-- Status with `Design: required`: `specified` → `designed` → `approved` (set by the developer
-  only) → `implemented`
-- Status with `Design: none`: `specified` → `implemented` → `reviewed` (set by the developer
+- Prototype: `none` (built directly from the specs) or `required` (a prototype with fake data,
+  under `/dev/prototypes`, is approved before it is built; see "Prototypes" in `AGENTS.md`)
+- Status with `Prototype: required`: `specified` → `prototyped` → `approved` (set by the
+  developer only) → `implemented` → `reviewed`
+- Status with `Prototype: none`: `specified` → `implemented` → `reviewed` (set by the developer
   only, after checking it in the browser)
+- Approved: the commit of the approved prototype, recorded when the status becomes `approved`
 
 ## <Screen name>
 
@@ -17,5 +19,5 @@ Every screen comes from the user stories of a spec and is listed here before it 
 - Actions: <...>
 - States: <from the acceptance criteria: empty, error, success>
 - Flow: <`docs/ui/flows/<spec-slug>.md`, when the spec has two or more screens>
-- Design: none
+- Prototype: none
 - Status: specified

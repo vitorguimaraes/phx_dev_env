@@ -126,8 +126,8 @@ The application is built with Claude Code, opened in the project's folder, in se
 1. **Design system** (once, before the first screen): you create a light and a dark theme in the [daisyUI theme generator](https://daisyui.com/theme-generator/), save them in `docs/ui/themes/` and ask the AI to define the design system; it applies them, measures the contrast and creates a component gallery for you to approve
 2. **Domain**: an interview that records the feature's vocabulary in `GLOSSARY.md` and its decisions in `docs/adr/`
 3. **Spec**: the problem, the solution and the numbered user stories
-4. **Screens**: `/screens <spec>` completes the Given/When/Then acceptance criteria and lists the screens in `docs/ui/screens.md` (and the flow in `docs/ui/flows/`, for two or more screens); you decide which ones are designed first
-5. **Design**: those screens are built and approved in the browser before the rest of the feature
+4. **Screens**: `/screens <spec>` completes the Given/When/Then acceptance criteria and lists the screens in `docs/ui/screens.md` (and the flow in `docs/ui/flows/`, for two or more screens); you decide which ones are prototyped first
+5. **Prototype**: `/prototype-screen <screen>` builds those screens with fake data under `/dev/prototypes`, for you to approve in the browser before the rest of the feature
 6. **Tickets**: the spec is split into vertical slices
 7. **Implementation and review**: test-driven, with `make app.precommit` before each commit and a review of each screen
 

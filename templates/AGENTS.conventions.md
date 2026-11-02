@@ -120,7 +120,7 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
   - every story with a user interface has Given/When/Then acceptance criteria for the main
     path and, when they can happen, the empty and error states
   - specs with two or more screens get a flow in `docs/ui/flows/<spec-slug>.md`
-  - the developer decides which screens are `Design: required`
+  - the developer decides which screens are `Prototype: required`
 - Tickets that build a screen point to its entry in `docs/ui/screens.md`
 - Every acceptance criterion of a screen has a LiveView test
 
@@ -145,8 +145,9 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
      `priv/static/fonts/` and `app.css`. Do not add or replace fonts without asking
   5. Fill the identity, contrast values, spacing, icons and components sections, and align the
      titles of the existing components (e.g. the `<h1>` of `<.header>`) with the typography roles
-  6. Create a dev-only `/dev/components` LiveView (next to `/dev/dashboard` in the
-     `dev_routes` scope) showing every component, text role, theme color and icon size
+  6. Create a dev-only `/dev/components` LiveView (`__APP_MODULE__Web.Prototypes.ComponentsLive`
+     in `dev/__APP___web/prototypes/`, routed in the `:prototypes` live session) showing every
+     component, text role, theme color and icon size
   7. Run `mix precommit`, commit (`🎨 style: set up design system`) and ask the developer to
      review `/dev/components` in light and dark mode. Apply the requested changes; only when
      the developer approves it, set the status to `defined` and commit
@@ -160,11 +161,32 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - When creating or changing a reusable component, add it to `/dev/components` and to the
   components table
 - Every screen is listed in `docs/ui/screens.md` before it is built:
-  - `Design: none`: build it from the specs and the screen entry, set it to `implemented` and
-    ask the developer to review it in the browser; only the developer sets `reviewed`
-  - `Design: required`: its look is decided before it is built; only the developer sets
-    `approved`, and only approved screens are implemented
+  - `Prototype: none`: build it from the specs and the screen entry, set it to `implemented`
+    and ask the developer to review it in the browser; only the developer sets `reviewed`
+  - `Prototype: required`: its prototype is built and approved before the screen is built
+    (see "Prototypes"); only the developer sets `approved`, and only approved screens are
+    implemented. Once implemented, it follows the same review as `Prototype: none`
   - Keep the status up to date
+
+## Prototypes
+
+- A prototype is a screen built with fake data, for the developer to review in the browser
+  before the real one is built. Build and change them with the `prototype-screen` skill
+  (`.claude/skills/prototype-screen/SKILL.md`; agents without skills follow that file)
+- Prototypes live in `dev/__APP___web/prototypes/` (compiled in dev and test only, never in
+  the release), use `__APP_MODULE__Web.Prototypes` and are routed in the `:prototypes` live
+  session of the router, under `/dev/prototypes`; their `render/1` has `@impl true`
+- Fake data in plain maps inside the prototype: never call contexts, `Repo` or schemas
+- States (`?state=`) come from the screen's acceptance criteria; variants (`?v=`) only to
+  compare layouts, and the rejected ones are deleted after the choice
+- Only the design system's resources, and the screen's text in Brazilian Portuguese through
+  `gettext`. The dev pages (the index, the frames and the toolbar) are in English and are not
+  translated
+- After the approval, the screen's markup becomes a function component in
+  `__APP_WEB__/components/<feature>_components.ex`: the real LiveView renders it with the
+  real data and the prototype with its fake data. The real LiveView never copies the markup
+- When a screen changes, change its component and keep the prototype's states in sync with
+  the acceptance criteria
 
 ## Language
 

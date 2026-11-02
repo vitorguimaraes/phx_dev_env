@@ -6,9 +6,9 @@ argument-hint: <spec file, issue number or story file>
 
 # Screens
 
-This step sits between the spec and the design: it turns user stories, written with any
+This step sits between the spec and the prototypes: it turns user stories, written with any
 method (`/to-spec`, BMAD stories, a hand-written file), into entries of `docs/ui/screens.md`.
-It decides which screens exist and what each one does; it does not design or build them.
+It decides which screens exist and what each one does; it does not prototype or build them.
 
 ## 1. Read the inputs
 
@@ -18,7 +18,7 @@ It decides which screens exist and what each one does; it does not design or bui
 - `GLOSSARY.md` and `docs/adr/`, when they exist: use their terms
 - `docs/ui/screens.md`, `docs/ui/flows/` and the router: the screens and routes that already exist
 - `docs/ui/design-system.md`: while its status is `not defined`, the screens can be listed, but
-  tell the developer that none is designed or built before the design system
+  tell the developer that none is prototyped or built before the design system
 
 ## 2. Complete the acceptance criteria
 
@@ -97,7 +97,7 @@ Present in one round, and wait for the developer's answer before writing:
 - the screens, each with its route, LiveView and stories
 - the coverage: a table from every story to its screens; every story with a user interface is
   covered, and the "no screen" stories are listed
-- for each screen, a recommended `Design` value with a one-line reason: `required` when its
+- for each screen, a recommended `Prototype` value with a one-line reason: `required` when its
   look needs to be decided first (a new layout, a dashboard, a key screen), `none` when the
   existing components are enough (forms, lists, details). The developer decides
 
@@ -105,6 +105,6 @@ Present in one round, and wait for the developer's answer before writing:
 
 Add or update the entries in `docs/ui/screens.md`, in its format: `Specs` links the stories,
 `States` comes from the criteria (empty, error, success), `Flow` links the flow file when there
-is one, and `Status` is `specified`. Then stop: do not design, create tickets or write code.
-Tell the developer the next step: designing the `required` screens (see "Design system and
-screens" in `AGENTS.md`) or creating the tickets.
+is one, and `Status` is `specified`. Then stop: do not prototype, create tickets or write code.
+Tell the developer the next step: prototyping the `required` screens with
+`/prototype-screen <screen>` or creating the tickets.
