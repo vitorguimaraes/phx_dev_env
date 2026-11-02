@@ -191,7 +191,10 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 ## Language
 
 - English for code (modules, functions, variables, database tables and columns),
-  comments, `@moduledoc`/`@doc`, commit messages and project docs (README, ADRs)
+  comments, `@moduledoc`/`@doc`, commit messages and project docs (ADRs, `GLOSSARY.md`,
+  `docs/`)
+- The project's `README.md` is in Brazilian Portuguese (with correct accents); keep code,
+  commands, paths and the names of skills and statuses as they are
 - Brazilian domain terms without a natural English translation (e.g. `cnpj`) may be kept as is
 - User-facing text is in Brazilian Portuguese and **always** goes through Gettext,
   with the Portuguese text as the message id: `gettext("Meus pedidos")`.

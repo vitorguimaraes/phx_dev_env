@@ -97,6 +97,7 @@ check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Pl
 check "CSP nonce in the root layout" grep -q 'nonce={@csp_nonce}' "lib/${name}_web/components/layouts/root.html.heex"
 check "no template markers or placeholders left" bash -c \
     '! grep -rqE "(db|auth):(start|end)|__[A-Z_]+__" .env .env.example docker-compose.yaml makefile AGENTS.md README.md .github .claude docs'
+check "README in Brazilian Portuguese, without the Phoenix one" bash -c "[[ \$(head -1 README.md) == '# ${module}' ]] && grep -q '^## Construção da aplicação' README.md && ! grep -q 'To start your Phoenix server' README.md"
 check "/screens skill" grep -q "^name: screens" .claude/skills/screens/SKILL.md
 check "/prototype-screen skill" bash -c "grep -q '^name: prototype-screen' .claude/skills/prototype-screen/SKILL.md && grep -q 'dev/${name}_web/prototypes/' .claude/skills/prototype-screen/SKILL.md"
 check "docs/ui/themes folder for the generator export" bash -c 'test -f docs/ui/themes/.gitkeep && test ! -e design'

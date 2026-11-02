@@ -2,198 +2,201 @@
 ![Phoenix](https://img.shields.io/badge/Phoenix%20Framework-FD4F00?style=for-the-badge&logo=phoenixframework&logoColor=fff)
 ![Postgres](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![daisyUI](https://img.shields.io/badge/daisyUI-5A0EF8?style=for-the-badge&logo=daisyui&logoColor=white)
 
 # Phoenix Development Environment
 
-Set up your environment without installing Elixir and Phoenix locally.
-This way, you don't need to download, install and configure dependencies or create and build a Docker image manually by yourself to start developing a new project.
+Configure o seu ambiente sem instalar Elixir e Phoenix localmente.
+Assim, você não precisa baixar, instalar e configurar dependências, nem criar e construir uma imagem Docker à mão para começar um projeto novo.
 
-## Technologies
+## Tecnologias
 
-The project uses:
+O template usa:
 
 - Docker
-- Docker compose
+- Docker Compose
 - Shell script
 
-The generated project uses:
+O projeto gerado usa:
 
-- Elixir and Phoenix, with LiveView
-- PostgreSQL (optional, with Ecto)
-- Tailwind CSS and daisyUI
+- Elixir e Phoenix, com LiveView
+- PostgreSQL (opcional, com Ecto)
+- Tailwind CSS e daisyUI
 - GitHub Actions
 
-## Getting started
+## Primeiros passos
 
-To create the project:
+Para criar o projeto:
 
-- Install [`docker`](https://docs.docker.com/engine/install/) and [`docker compose`](https://docs.docker.com/compose/install/)
-- Optionally install `make`, to run the [makefile commands](#7-makefile-commands) from the host (`sudo apt install make` on Ubuntu)
+- Instale o [`docker`](https://docs.docker.com/engine/install/) e o [`docker compose`](https://docs.docker.com/compose/install/)
+- Opcionalmente, instale o `make`, para rodar os [comandos do makefile](#7-comandos-do-makefile) pelo host (`sudo apt install make` no Ubuntu)
 
-> On Ubuntu, `run.sh` installs Docker automatically if it is not installed (see [`docker.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker.sh)).  
-> On other systems, install Docker manually before running it.
+> No Ubuntu, o `run.sh` instala o Docker automaticamente se ele não estiver instalado (veja o [`docker.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker.sh)).  
+> Em outros sistemas, instale o Docker manualmente antes de rodá-lo.
 
-To build the application (see [step 6](#6-build-the-application)):
+Para construir a aplicação (veja o [passo 6](#6-construir-a-aplicação)):
 
-- [Claude Code](https://claude.com/claude-code), the AI agent that follows the project conventions
-- Optionally the [`gh`](https://cli.github.com/) CLI, to create the GitHub repository and keep specs and tickets in GitHub issues
-- Only for the BMAD Method: Node.js 20.12+, Python 3.10+ and [uv](https://docs.astral.sh/uv/)
+- [Claude Code](https://claude.com/claude-code), o agente de IA que segue as convenções do projeto
+- Opcionalmente, o CLI [`gh`](https://cli.github.com/), para criar o repositório no GitHub e manter as specs e os tickets em issues do GitHub
+- Só para o BMAD Method: Node.js 20.12+, Python 3.10+ e [uv](https://docs.astral.sh/uv/)
 
-## How to run
+## Como usar
 
-### 1. Clone the repository locally  
+### 1. Clone o repositório
 
-In your terminal use `git` to clone the repository locally.
+No terminal, use o `git` para clonar o repositório.
 > git clone <https://github.com/VitorGuimaraes/phx_dev_env.git>
 
-### 2. Setup your project variables in `.env`
+### 2. Configure as variáveis do projeto no `.env`
 
-In `.env` you can setup your postgres variables and some variables used in [`docker-compose.yaml`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker-compose.yaml).
-The defaults work as they are: `run.sh` sets the names, ports and user ids by itself.
+No `.env` ficam as variáveis do Postgres e algumas variáveis usadas no [`docker-compose.yaml`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/docker-compose.yaml).
+Os valores padrão funcionam como estão: o `run.sh` define sozinho os nomes, as portas e os ids de usuário.
 
-### 3. Run the shell script
+### 3. Rode o script
 
 > ./run.sh
 
-It will ask for the project's name, if you want to use Ecto, UUID (`--binary-id`) and authentication (`mix phx.gen.auth`).
-The answers can also be given as options (`./run.sh --help`), for example:
+Ele pergunta o nome do projeto e se você quer usar Ecto, UUID (`--binary-id`) e autenticação (`mix phx.gen.auth`).
+As respostas também podem ser passadas como opções (`./run.sh --help`), por exemplo:
 
 > ./run.sh --name my_app --ecto --uuid --auth
 
-Then it:
+Depois, ele:
 
-- creates the Phoenix project with the container, owned by your user;
-- configures `config/dev.exs` and `config/test.exs` to use the database from `.env` (without Ecto, the database service and variables are removed);
-- optionally generates authentication with LiveView pages (`mix phx.gen.auth Accounts User users --live`);
-- renames the current folder to the project's name;
-- moves `dev.sh` to `scripts/`;
-- creates `.env.example` and adds `.env` to `.gitignore`;
-- adds the project conventions to `AGENTS.md` (Docker, commits, tests, UI and language) and creates `CLAUDE.md` importing it;
-- adds a `commit-msg` hook that validates `<gitmoji> <type>(<scope>): <description>` messages;
-- sets `pt_BR` as the default locale, with the Ecto validation errors translated;
-- replaces Heroicons with [`Lucide`](https://lucide.dev/icons) icons, including the `mix phx.gen.*` generators (see `templates/icons/`);
-- adds [`credo`](https://github.com/rrrene/credo), [`sobelow`](https://github.com/nccgroup/sobelow), [`mix_audit`](https://github.com/mirego/mix_audit) and [`mix_test_watch`](https://github.com/lpil/mix-test.watch) as dev/test dependencies, with Credo, Sobelow and `mix deps.audit` in `mix precommit`;
-- sets a Content-Security-Policy with a nonce per request (`templates/csp/`), so inline scripts run only with the nonce;
-- adds a GitHub Actions CI (`.github/workflows/ci.yml`) running the `mix precommit` checks on every push and pull request;
-- generates a production release image (`Dockerfile`, `mix phx.gen.release --docker`); the development image is `Dockerfile.dev`;
-- names the containers, image and network after the project and picks free host ports, so several projects can run at the same time (the ports are registered in `~/.config/phx_dev_env/projects`, so a stopped project keeps its ports);
-- installs the Figtree (interface and text) and Lato (titles) fonts, self-hosted (see `templates/fonts/`);
-- adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `docs/ui/themes/` for the daisyUI theme export;
-- adds the `/screens` skill for Claude Code (`.claude/skills/screens/`), which turns the user stories of a spec into screens;
-- appends development instructions, including the application building steps, to the project's `README.md`;
-- starts a new git repository.
+- cria o projeto Phoenix pelo container, com os arquivos no seu usuário;
+- configura o `config/dev.exs` e o `config/test.exs` para usar o banco do `.env` (sem Ecto, o serviço e as variáveis do banco são removidos);
+- opcionalmente, gera a autenticação com páginas em LiveView (`mix phx.gen.auth Accounts User users --live`);
+- renomeia a pasta atual com o nome do projeto;
+- move o `dev.sh` para `scripts/`;
+- cria o `.env.example` e adiciona o `.env` ao `.gitignore`;
+- adiciona as convenções do projeto ao `AGENTS.md` (Docker, commits, testes, UI e idioma) e cria o `CLAUDE.md`, que o importa;
+- adiciona um hook `commit-msg` que valida mensagens no formato `<gitmoji> <type>(<scope>): <description>`;
+- define `pt_BR` como locale padrão, com os erros de validação do Ecto traduzidos;
+- troca os Heroicons pelos ícones do [`Lucide`](https://lucide.dev/icons), inclusive nos geradores `mix phx.gen.*` (veja `templates/icons/`);
+- adiciona [`credo`](https://github.com/rrrene/credo), [`sobelow`](https://github.com/nccgroup/sobelow), [`mix_audit`](https://github.com/mirego/mix_audit) e [`mix_test_watch`](https://github.com/lpil/mix-test.watch) como dependências de dev/test, com o Credo, o Sobelow e o `mix deps.audit` no `mix precommit`;
+- define uma Content-Security-Policy com um nonce por requisição (`templates/csp/`), para que scripts inline só rodem com o nonce;
+- adiciona uma CI no GitHub Actions (`.github/workflows/ci.yml`) que roda as verificações do `mix precommit` a cada push e pull request;
+- gera uma imagem de release para produção (`Dockerfile`, `mix phx.gen.release --docker`); a imagem de desenvolvimento é o `Dockerfile.dev`;
+- dá aos containers, à imagem e à rede o nome do projeto e escolhe portas livres no host, para que vários projetos rodem ao mesmo tempo (as portas ficam registradas em `~/.config/phx_dev_env/projects`, então um projeto parado mantém as suas portas);
+- instala as fontes Figtree (interface e textos) e Lato (títulos), servidas pelo próprio projeto (veja `templates/fonts/`);
+- adiciona o `docs/ui/design-system.md` (definido na primeira tarefa de UI do projeto), o `docs/ui/screens.md` (inventário de telas) e o `docs/ui/themes/`, para os temas exportados do daisyUI;
+- prepara os protótipos de telas em `/dev/prototypes` (LiveViews com dados falsos em `dev/`, compiladas só em dev e test, fora da release; veja `templates/prototypes/`);
+- adiciona as skills `/screens` e `/prototype-screen` para o Claude Code (`.claude/skills/`), que transformam as user stories de uma spec em telas e as telas em protótipos;
+- substitui o `README.md` do projeto por um em português, com as instruções de desenvolvimento e os passos de construção da aplicação;
+- inicia um novo repositório git.
 
-If Docker is installed by the script, log out and log in again (to apply the `docker` group), then run `./run.sh` again.  
-Check [`run.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/run.sh) file for more information.  
+Se o Docker for instalado pelo script, saia da sessão e entre de novo (para aplicar o grupo `docker`) e rode o `./run.sh` outra vez.  
+Veja o [`run.sh`](https://github.com/VitorGuimaraes/phx_dev_env/blob/master/run.sh) para mais detalhes.  
 
-### 4. Start developing
+### 4. Comece a desenvolver
 
-Go to the project's folder, start the services and open a shell in the app container  
+Vá para a pasta do projeto, suba os serviços e abra um shell no container da aplicação  
 > cd ../<project_name>  
 > ./scripts/dev.sh
 
-Inside the container, get the dependencies, create the database (only if using Ecto), build the assets and start the server  
+Dentro do container, baixe as dependências, crie o banco (só com Ecto), gere os assets e suba o servidor  
 > make app.setup  
 > make app
 
-Or, if you have `make` installed, do the same from the host (first time only for `make app.setup`)  
+Ou, se você tem o `make` instalado, faça o mesmo pelo host (o `make app.setup` só na primeira vez)  
 > make up  
 > make app.setup  
 > make app
 
-Visit `http://localhost:<APP_HOST_PORT>` (shown at the end of `run.sh` and defined in `.env`, default `4000`) and check Phoenix page.  
+Acesse `http://localhost:<APP_HOST_PORT>` (mostrado no fim do `run.sh` e definido no `.env`, padrão `4000`) e confira a página do Phoenix.  
 
-### 5. Publish on GitHub
+### 5. Publique no GitHub
 
-`run.sh` starts the git repository without commits. Make the first commit and push it, so the CI runs on every push:
+O `run.sh` inicia o repositório git sem commits. Faça o primeiro commit e o push, para que a CI rode a cada push:
 
 > git add .  
 > git commit -m "🔧 chore: create the project"
 
-With the `gh` CLI (logged in with `gh auth login`):
+Com o CLI `gh` (logado com `gh auth login`):
 > gh repo create <project_name> --private --source . --push
 
-Or create an empty repository on GitHub (without README, license or `.gitignore`) and push to it:
+Ou crie um repositório vazio no GitHub (sem README, licença ou `.gitignore`) e faça o push para ele:
 > git remote add origin git@github.com:<user>/<project_name>.git  
 > git push -u origin HEAD
 
-The first CI run takes a few minutes (the next ones use the cache); see it in the repository's Actions tab.
+A primeira execução da CI leva alguns minutos (as seguintes usam o cache); acompanhe na aba Actions do repositório.
 
-### 6. Build the application
+### 6. Construir a aplicação
 
-The application is built with Claude Code, opened in the project's folder, in seven steps. They are detailed in "Building the application" in the project's `README.md` (from [`templates/README.development.md`](templates/README.development.md)):
+A aplicação é construída com o Claude Code, aberto na pasta do projeto, em sete passos. Eles estão detalhados em "Construção da aplicação" no `README.md` do projeto (gerado a partir do [`templates/README.development.md`](templates/README.development.md)):
 
-1. **Design system** (once, before the first screen): you create a light and a dark theme in the [daisyUI theme generator](https://daisyui.com/theme-generator/), save them in `docs/ui/themes/` and ask the AI to define the design system; it applies them, measures the contrast and creates a component gallery for you to approve
-2. **Domain**: an interview that records the feature's vocabulary in `GLOSSARY.md` and its decisions in `docs/adr/`
-3. **Spec**: the problem, the solution and the numbered user stories
-4. **Screens**: `/screens <spec>` completes the Given/When/Then acceptance criteria and lists the screens in `docs/ui/screens.md` (and the flow in `docs/ui/flows/`, for two or more screens); you decide which ones are prototyped first
-5. **Prototype**: `/prototype-screen <screen>` builds those screens with fake data under `/dev/prototypes`, for you to approve in the browser before the rest of the feature
-6. **Tickets**: the spec is split into vertical slices
-7. **Implementation and review**: test-driven, with `make app.precommit` before each commit and a review of each screen
+1. **Design system** (uma vez, antes da primeira tela): você cria um tema claro e um escuro no [gerador de temas do daisyUI](https://daisyui.com/theme-generator/), salva os dois em `docs/ui/themes/` e pede à IA para definir o design system; ela aplica os temas, mede o contraste e cria uma galeria de componentes para você aprovar
+2. **Domínio**: uma entrevista que registra o vocabulário da funcionalidade no `GLOSSARY.md` e as decisões em `docs/adr/`
+3. **Spec**: o problema, a solução e as user stories numeradas
+4. **Telas**: `/screens <spec>` completa os critérios de aceite Given/When/Then e lista as telas em `docs/ui/screens.md` (e o fluxo em `docs/ui/flows/`, para duas ou mais telas); você decide quais são prototipadas primeiro
+5. **Protótipo**: `/prototype-screen <tela>` constrói essas telas com dados falsos em `/dev/prototypes`, para você aprovar no navegador antes do resto da funcionalidade
+6. **Tickets**: a spec é dividida em fatias verticais
+7. **Implementação e revisão**: guiada por testes, com o `make app.precommit` antes de cada commit e a revisão de cada tela
 
-Steps 2, 3, 6 and 7 use one of two methods: the [Matt Pocock skills](https://github.com/mattpocock/skills) (lighter, recommended) or the [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) (more roles and documents, for bigger projects). Steps 1, 4 and 5 are the same for both.
+Os passos 2, 3, 6 e 7 usam um de dois métodos: as [skills do Matt Pocock](https://github.com/mattpocock/skills) (mais leve, recomendado) ou o [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD) (mais papéis e documentos, para projetos maiores). Os passos 1, 4 e 5 são iguais nos dois.
 
-### 7. Makefile commands
+### 7. Comandos do makefile
 
-The `app.*` commands work both from the host (they run through `docker compose exec`) and inside the app container.
+Os comandos `app.*` funcionam tanto pelo host (eles rodam via `docker compose exec`) quanto dentro do container da aplicação.
 
-- `make up` / `make down` (host only)  
-   start / stop the services.
+- `make up` / `make down` (só no host)  
+   sobe / para os serviços.
 
-- `make shell` (host only)  
-   open a shell in the app container.
+- `make shell` (só no host)  
+   abre um shell no container da aplicação.
 
 - `make app.setup`  
-   get the dependencies, create the database and build the assets (`mix setup`).
+   baixa as dependências, cria o banco e gera os assets (`mix setup`).
 
 - `make app`  
-   start the server with an interactive shell (`iex -S mix phx.server`).
+   sobe o servidor com um shell interativo (`iex -S mix phx.server`).
 
 - `make app.migrate`  
-   run the migrations.
+   roda as migrations.
 
 - `make app.test`  
-   run the tests and format the code. You can pass a file: `make app.test test/my_test.exs`
+   roda os testes e formata o código. Você pode passar um arquivo: `make app.test test/my_test.exs`
 
 - `make app.precommit`  
-   compile with warnings as errors, remove unused deps, format, run Credo, Sobelow, `mix deps.audit` and the tests (`mix precommit`). Run it before committing.
+   compila com warnings como erros, remove dependências não usadas, formata, roda o Credo, o Sobelow, o `mix deps.audit` e os testes (`mix precommit`). Rode antes de cada commit.
 
 - `make app.test.watch`  
-   run the tests on file changes ([`mix_test_watch`](https://github.com/lpil/mix-test.watch)).
+   roda os testes a cada mudança nos arquivos ([`mix_test_watch`](https://github.com/lpil/mix-test.watch)).
 
 - `make app.credo`  
-   run [`Credo`](https://github.com/rrrene/credo) in strict mode.
+   roda o [`Credo`](https://github.com/rrrene/credo) no modo strict.
 
-### 8. Testing the template
+### 8. Testando o template
 
-`e2e.sh` tests `run.sh` end to end: it creates a project from a temporary copy of this folder (including uncommitted changes), checks the generated files, runs `mix setup`, `mix precommit` and the server in the real containers, and removes everything at the end.
+O `e2e.sh` testa o `run.sh` de ponta a ponta: cria um projeto a partir de uma cópia temporária desta pasta (incluindo as mudanças não commitadas), confere os arquivos gerados, roda o `mix setup`, o `mix precommit` e o servidor nos containers reais, e remove tudo no fim.
 
-> ./e2e.sh                 # with Ecto  
-> ./e2e.sh --auth --release   # with authentication, also building the production image  
+> ./e2e.sh                 # com Ecto  
+> ./e2e.sh --auth --release   # com autenticação, gerando também a imagem de produção  
 > ./e2e.sh --no-ecto  
-> ./e2e.sh --keep          # keep the project to inspect it
+> ./e2e.sh --keep          # mantém o projeto para inspecioná-lo
 
-### 9. Connecting in DBeaver
+### 9. Conectando no DBeaver
 
 Host: `localhost`  
-Port: DB_HOST_PORT defined in `.env` (default `6032`; only reachable from your machine)  
-Database: POSTGRES_DB defined in `.env`  
-Username: POSTGRES_USER defined in `.env`  
-Password: POSTGRES_PASSWORD defined in `.env`  
+Porta: DB_HOST_PORT definida no `.env` (padrão `6032`; acessível só a partir da sua máquina)  
+Banco: POSTGRES_DB definido no `.env`  
+Usuário: POSTGRES_USER definido no `.env`  
+Senha: POSTGRES_PASSWORD definida no `.env`  
 
-### 10. Managing images and containers
+### 10. Gerenciando imagens e containers
 
 - `docker compose up -d`  
-   up services.
+   sobe os serviços.
 
 - `docker compose down`  
-   down services.
+   para os serviços.
 
 - `docker exec -it $APP_CONTAINER_NAME sh`  
-   exec shell in a running container.
+   abre um shell num container em execução.
 
 - `docker compose run --rm app_service sh`  
-   run a new container with shell and clean up when exit.
+   roda um novo container com shell e o remove ao sair.
 
 - `docker compose down -v`  
-   down services and delete the database volume (the database is recreated on the next start).
+   para os serviços e apaga o volume do banco (o banco é recriado na próxima subida).
