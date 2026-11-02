@@ -1,60 +1,62 @@
 # Design system
 
-Status: not defined   <!-- not defined | defined (only after the developer approves /dev/components) -->
+Status: not defined   <!-- not defined | defined (só depois que a pessoa desenvolvedora aprova o /dev/components) -->
 
-Defined by the first UI task of the project: see "1. Design system" in `README.md` for what the
-developer provides, and "Design system and screens" in `AGENTS.md` for the setup steps.
+Definido pela primeira tarefa de UI do projeto: veja "1. Design system" no `README.md` para o que
+a pessoa desenvolvedora fornece, e "Design system and screens" no `AGENTS.md` para os passos da
+configuração.
 
-## Theme
+## Tema
 
-- Source: `assets/css/app.css` (daisyUI themes `light` and `dark`)
-- Generator export: `docs/ui/themes/light.css` and `docs/ui/themes/dark.css` (the starting point;
-  later fixes are made only in `app.css`)
-- Identity: <short description of the brand and of each color's role>
+- Fonte: `assets/css/app.css` (temas `light` e `dark` do daisyUI)
+- Exportação do gerador: `docs/ui/themes/light.css` e `docs/ui/themes/dark.css` (o ponto de
+  partida; os ajustes seguintes são feitos só no `app.css`)
+- Identidade: <descrição curta da marca e do papel de cada cor>
 
-### Contrast (WCAG: at least 4.5:1 for text)
+### Contraste (WCAG: no mínimo 4.5:1 para texto)
 
-| Pair | Light | Dark |
+| Par | Claro | Escuro |
 |---|---|---|
-| `base-content` on `base-100` / `base-200` / `base-300` | | |
-| `base-content/70` (captions) on `base-100` / `base-200` | | |
-| `primary-content` on `primary` (same for secondary, accent, neutral) | | |
-| `info` / `success` / `warning` / `error` on `base-100` | | |
-| `<color>-content` on `<color>` for info, success, warning, error | | |
+| `base-content` sobre `base-100` / `base-200` / `base-300` | | |
+| `base-content/70` (legendas) sobre `base-100` / `base-200` | | |
+| `primary-content` sobre `primary` (o mesmo para secondary, accent, neutral) | | |
+| `info` / `success` / `warning` / `error` sobre `base-100` | | |
+| `<color>-content` sobre `<color>` para info, success, warning, error | | |
 
-## Typography
+## Tipografia
 
-- Families (self-hosted in `priv/static/fonts/`, `@font-face` and `@theme` in `app.css`):
-  - Figtree (variable, 300 to 900, normal and italic): `--font-sans`, the interface and body text
-  - Lato (400 and 700): `--font-display` (`font-display` class), page and section titles only
+- Famílias (servidas pelo projeto em `priv/static/fonts/`, com `@font-face` e `@theme` no `app.css`):
+  - Figtree (variável, de 300 a 900, normal e itálico): `--font-sans`, a interface e os textos
+  - Lato (400 e 700): `--font-display` (classe `font-display`), só nos títulos de página e de seção
 
-| Role | Classes |
+| Papel | Classes |
 |---|---|
-| Page title | `font-display text-xl font-bold` |
-| Section title | `font-display text-lg font-bold` |
-| Body | `text-sm` |
-| Field label | `text-sm font-medium` |
-| Caption / help | `text-xs text-base-content/70` |
+| Título da página | `font-display text-xl font-bold` |
+| Título de seção | `font-display text-lg font-bold` |
+| Texto | `text-sm` |
+| Rótulo de campo | `text-sm font-medium` |
+| Legenda / ajuda | `text-xs text-base-content/70` |
 
-## Spacing and radius
+## Espaçamento e raio
 
-- Tailwind scale (multiples of 4px); page padding, section gap and form field gap: <values>
-- Radius from the theme: `rounded-box` (cards, modals, tables), `rounded-field` (buttons,
-  inputs), `rounded-selector` (checkboxes, badges)
+- Escala do Tailwind (múltiplos de 4px); padding da página, espaço entre seções e entre campos
+  de formulário: <valores>
+- Raio do tema: `rounded-box` (cards, modais, tabelas), `rounded-field` (botões, inputs),
+  `rounded-selector` (checkboxes, badges)
 
-## Icons
+## Ícones
 
-- Lucide with `<.icon name="lucide-...">`; sizes: <e.g. `size-4` inline, `size-5` in buttons>
+- Lucide com `<.icon name="lucide-...">`; tamanhos: <ex.: `size-4` no texto, `size-5` em botões>
 
-## Components
+## Componentes
 
-| Component | Use for |
+| Componente | Uso |
 |---|---|
-| `<.button>` | <variants and when to use each> |
-| `<.input>` | <field types> |
-| `<.table>` | <lists> |
-| `<.header>` | <page header with title, subtitle and actions> |
-| `<.list>` | <details> |
-| `<.flash>` | <feedback messages> |
+| `<.button>` | <variantes e quando usar cada uma> |
+| `<.input>` | <tipos de campo> |
+| `<.table>` | <listas> |
+| `<.header>` | <cabeçalho da página com título, subtítulo e ações> |
+| `<.list>` | <detalhes> |
+| `<.flash>` | <mensagens de feedback> |
 
-Visual reference: `/dev/components` (dev only)
+Referência visual: `/dev/components` (só em dev)

@@ -1,23 +1,25 @@
-# Screens
+# Telas
 
-Every screen comes from the user stories of a spec and is listed here before it is built (see
-"Domain, specs and screens" and "Design system and screens" in `AGENTS.md`).
+Toda tela vem das user stories de uma spec e é listada aqui antes de ser construída (veja
+"Domain, specs and screens" e "Design system and screens" no `AGENTS.md`). Os nomes dos campos
+e os valores de status ficam em inglês: as skills e o `AGENTS.md` dependem deles.
 
-- Prototype: `none` (built directly from the specs) or `required` (a prototype with fake data,
-  under `/dev/prototypes`, is approved before it is built; see "Prototypes" in `AGENTS.md`)
-- Status with `Prototype: required`: `specified` → `prototyped` → `approved` (set by the
-  developer only) → `implemented` → `reviewed`
-- Status with `Prototype: none`: `specified` → `implemented` → `reviewed` (set by the developer
-  only, after checking it in the browser)
-- Approved: the commit of the approved prototype, recorded when the status becomes `approved`
+- Prototype: `none` (construída direto a partir das specs) ou `required` (um protótipo com
+  dados falsos, em `/dev/prototypes`, é aprovado antes de ela ser construída; veja "Prototypes"
+  no `AGENTS.md`)
+- Status com `Prototype: required`: `specified` → `prototyped` → `approved` (definido só pela
+  pessoa desenvolvedora) → `implemented` → `reviewed`
+- Status com `Prototype: none`: `specified` → `implemented` → `reviewed` (definido só pela
+  pessoa desenvolvedora, depois de conferir a tela no navegador)
+- Approved: o commit do protótipo aprovado, registrado quando o status vira `approved`
 
-## <Screen name>
+## <Nome da tela>
 
 - Route: `/orders` — LiveView: `__APP_MODULE__Web.OrderLive.Index`
-- Specs: <the user stories it covers: issue link or file in `docs/`, e.g. `#12 (stories 3, 4)`>
+- Specs: <as user stories que ela cobre: link da issue ou arquivo em `docs/`, ex.: `#12 (stories 3, 4)`>
 - Data shown: <...>
 - Actions: <...>
-- States: <from the acceptance criteria: empty, error, success>
-- Flow: <`docs/ui/flows/<spec-slug>.md`, when the spec has two or more screens>
+- States: <dos critérios de aceite: vazio, erro, sucesso>
+- Flow: <`docs/ui/flows/<spec-slug>.md`, quando a spec tem duas ou mais telas>
 - Prototype: none
 - Status: specified

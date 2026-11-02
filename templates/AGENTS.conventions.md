@@ -109,9 +109,10 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 ## Domain, specs and screens
 
 - `GLOSSARY.md`, when it exists, is the source of the domain terms: use them in the names of
-  contexts, schemas and functions. When a new term appears, or one conflicts with the
-  glossary, ask the developer before using it and record the answer there. Architectural
-  decisions go in `docs/adr/`
+  contexts, schemas and functions. Each entry has the term in Portuguese, its English name in
+  the code and a definition in Portuguese (e.g. "**Pedido** (`Order`): ..."). When a new term
+  appears, or one conflicts with the glossary, ask the developer before using it and record
+  the answer there. Architectural decisions go in `docs/adr/`
 - Every screen comes from the user stories of a spec (an issue or a file in `docs/`). Before
   adding a screen to `docs/ui/screens.md`, find its spec; when there is none, ask the
   developer instead of inventing requirements
@@ -190,11 +191,13 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 
 ## Language
 
-- English for code (modules, functions, variables, database tables and columns),
-  comments, `@moduledoc`/`@doc`, commit messages and project docs (ADRs, `GLOSSARY.md`,
-  `docs/`)
-- The project's `README.md` is in Brazilian Portuguese (with correct accents); keep code,
-  commands, paths and the names of skills and statuses as they are
+- English for code (modules, functions, variables, database tables and columns, routes),
+  comments, `@moduledoc`/`@doc`, commit messages, this file and the skills in `.claude/skills/`
+- Brazilian Portuguese, with correct accents, for every other document: `README.md`,
+  `GLOSSARY.md`, the ADRs in `docs/adr/`, the specs and their acceptance criteria, and
+  `docs/ui/` (screens, flows and design system). They cite code, modules, functions, commands,
+  paths, field names and status values by their original English names, never translated
+  (e.g. "a tela chama `Orders.list_orders/1`", "status `approved`")
 - Brazilian domain terms without a natural English translation (e.g. `cnpj`) may be kept as is
 - User-facing text is in Brazilian Portuguese and **always** goes through Gettext,
   with the Portuguese text as the message id: `gettext("Meus pedidos")`.

@@ -31,11 +31,12 @@ Every story with a user interface needs Given/When/Then criteria covering:
 Stories without a user interface (background jobs, integrations) are marked as "no screen"
 and skip this step.
 
-When criteria are missing, propose them with the user-facing text in Portuguese, e.g.:
+When criteria are missing, propose them in Brazilian Portuguese, keeping the Given/When/Then
+structure (Dado/Quando/Então), e.g.:
 
 ```
-- Given I have no orders, when I open the orders page,
-  then I see "Você ainda não tem pedidos" and a "Novo pedido" button
+- Dado que não tenho pedidos, quando abro a página de pedidos,
+  então vejo "Você ainda não tem pedidos" e um botão "Novo pedido"
 ```
 
 Never invent business rules: what the spec does not say becomes a question. After the
@@ -58,30 +59,31 @@ places.
 
 ## 4. Map the flow (two or more screens)
 
-When the spec creates or changes two or more screens, write `docs/ui/flows/<spec-slug>.md`;
-for a single screen, skip this step. Context functions are proposals named with the glossary
+When the spec creates or changes two or more screens, write `docs/ui/flows/<spec-slug>.md`
+in Brazilian Portuguese (code names, routes and functions stay in English); for a single
+screen, skip this step. Context functions are proposals named with the glossary
 terms; the tickets settle them.
 
 ````markdown
-# <Spec title>
+# <Título da spec>
 
 Spec: <link>
 
-## Places
+## Lugares
 
-| ID | Place | Route and entry |
+| ID | Lugar | Rota e entrada |
 |---|---|---|
 | P1 | Lista de pedidos | `/orders` |
-| P2 | Novo pedido | `/orders/new`, from A1 |
+| P2 | Novo pedido | `/orders/new`, a partir de A1 |
 
-## Actions
+## Ações
 
-| ID | Place | Action | Handled by | Leads to |
+| ID | Lugar | Ação | Tratada por | Leva a |
 |---|---|---|---|---|
-| A1 | P1 | "Novo pedido" button | `navigate` | P2 |
-| A2 | P2 | submits the form | `handle_event("save")` → `Orders.create_order/2` | P1 with "Pedido criado", or P2 with the errors |
+| A1 | P1 | botão "Novo pedido" | `navigate` | P2 |
+| A2 | P2 | envia o formulário | `handle_event("save")` → `Orders.create_order/2` | P1 com "Pedido criado", ou P2 com os erros |
 
-## Flow
+## Fluxo
 
 ```mermaid
 flowchart LR
@@ -103,7 +105,8 @@ Present in one round, and wait for the developer's answer before writing:
 
 ## 6. Write the entries
 
-Add or update the entries in `docs/ui/screens.md`, in its format: `Specs` links the stories,
+Add or update the entries in `docs/ui/screens.md`, in its format and in Brazilian Portuguese
+(the field names and status values stay in English): `Specs` links the stories,
 `States` comes from the criteria (empty, error, success), `Flow` links the flow file when there
 is one, and `Status` is `specified`. Then stop: do not prototype, create tickets or write code.
 Tell the developer the next step: prototyping the `required` screens with
