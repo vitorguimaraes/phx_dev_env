@@ -96,6 +96,10 @@ check "no template markers or placeholders left" bash -c \
     '! grep -rqE "(db|auth):(start|end)|__[A-Z_]+__" .env .env.example docker-compose.yaml makefile AGENTS.md README.md .github .claude docs'
 check "/screens skill" grep -q "^name: screens" .claude/skills/screens/SKILL.md
 check "docs/ui/themes folder for the generator export" bash -c 'test -f docs/ui/themes/.gitkeep && test ! -e design'
+check "prototype files" bash -c "test -f dev/${name}_web/prototypes.ex && test -f dev/${name}_web/prototypes/index_live.ex && test -f dev/${name}_web/prototypes/frame_live.ex && test -f test/${name}_web/prototypes_test.exs"
+check "prototype routes in dev and test" bash -c "grep -q 'live_session :prototypes do' lib/${name}_web/router.ex && grep -q ':prototypes, true' config/dev.exs && grep -q ':prototypes, true' config/test.exs && ! grep -q ':prototypes' config/prod.exs"
+check "dev/ compiled in dev and test only" bash -c "grep -qF 'defp elixirc_paths(:dev), do: [\"lib\", \"dev\"]' mix.exs && grep -qF 'defp elixirc_paths(_), do: [\"lib\"]' mix.exs"
+check "dev/ in live reload, Tailwind, formatter and Credo" bash -c "grep -qF '~r\"dev/' config/runtime.exs && grep -qx '@source \"../../dev\";' assets/css/app.css && grep -qF '{config,dev,lib,test}' .formatter.exs && grep -qF '\"dev/\"' .credo.exs"
 check "AGENTS.md conventions and CLAUDE.md" bash -c 'grep -q "^## Development environment (Docker)" AGENTS.md && grep -qx "@AGENTS.md" CLAUDE.md'
 check "Docker names from the project name" bash -c "grep -qx APP_CONTAINER_NAME=${name}_app .env && grep -qx APP_IMAGE_NAME=${name}_app .env"
 check ".env ignored, .env.example created" bash -c 'grep -qx ".env" .gitignore && test -f .env.example'
@@ -127,6 +131,29 @@ else
     check "no authentication" test ! -e "lib/${name}/accounts.ex"
     check "no authentication rules in AGENTS.md" bash -c '! grep -q "Authentication was generated" AGENTS.md'
 fi
+
+# a sample prototype, so mix precommit compiles, checks and renders a real one
+cat > "dev/${name}_web/prototypes/sample_live.ex" <<EOF
+defmodule ${module}Web.Prototypes.SampleLive do
+  use ${module}Web.Prototypes,
+    name: "Sample",
+    states: ~w(filled empty),
+    variants: ~w(compact wide)
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <Layouts.app flash={@flash}>
+      <p :if={@state == "filled"}>Filled, {@variant}</p>
+      <p :if={@state == "empty"}>Empty</p>
+    </Layouts.app>
+    <.toolbar prototype={@prototype} />
+    """
+  end
+end
+EOF
+sed -i 's|^\(        live "/prototypes/frame", FrameLive\)$|\1\n        live "/prototypes/sample", SampleLive|' "lib/${name}_web/router.ex"
+check "sample prototype routed" grep -q 'live "/prototypes/sample", SampleLive' "lib/${name}_web/router.ex"
 
 printf "\n== mix setup and mix precommit\n"
 docker compose up -d
@@ -167,6 +194,11 @@ check "CSP without unsafe-inline scripts" bash -c "! curl -sI $url | grep -i '^c
 check "app.css has the Lucide icons" bash -c "curl -s $url/assets/css/app.css | grep -q 'lucide-'"
 check "app.css has the fonts" bash -c "curl -s $url/assets/css/app.css | grep -q 'figtree-latin-wght-normal.woff2'"
 check "fonts are served" bash -c "for f in figtree-latin-wght-normal figtree-latin-wght-italic lato-latin-400-normal lato-latin-700-normal; do [[ \$(curl -s -o /dev/null -w '%{http_code}' $url/fonts/\$f.woff2) == 200 ]] || exit 1; done"
+check "prototypes index lists the sample" bash -c "curl -s $url/dev/prototypes | grep -q 'Sample'"
+check "CSP nonce on the prototypes index" csp_page_ok /dev/prototypes
+check "CSP nonce on a prototype state" csp_page_ok "/dev/prototypes/sample?state=empty&v=wide"
+check "CSP nonce on the prototype frames" csp_page_ok "/dev/prototypes/frame?path=/dev/prototypes/sample"
+check "app.css has the prototype classes" bash -c "curl -s $url/assets/css/app.css | grep -q 'origin-top-left'"
 if [[ "$use_auth" == y ]]; then
     check "log in page responds 200" bash -c "[[ \$(curl -s -o /dev/null -w '%{http_code}' $url/users/log-in) == 200 ]]"
     check "CSP nonce on the log in page" csp_page_ok /users/log-in
@@ -179,6 +211,8 @@ if [[ "$build_release" == y ]]; then
         -e SECRET_KEY_BASE="$(printf 'x%.0s' $(seq 64))" \
         -e DATABASE_URL=ecto://user:password@localhost/db -e PHX_HOST=localhost \
         "${name}_release" "/app/bin/${name}" eval 'IO.puts(:ok)'
+    check "no prototypes in the release" docker run --rm --entrypoint sh "${name}_release" -c \
+        "ls /app/lib/${name}-*/ebin | grep -q Router && ! ls /app/lib/${name}-*/ebin | grep -q Prototypes"
 fi
 
 printf "\n"

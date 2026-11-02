@@ -375,6 +375,48 @@ if grep -E '<script' "$root_layout" | grep -v ' src=' | grep -qv 'nonce='; then
     die "Inline scripts without the CSP nonce in $root_layout."
 fi
 
+# screen prototypes under /dev/prototypes (see templates/prototypes): LiveViews with fake data
+# in dev/, compiled in dev and test only
+perl -0pi -e 's/  defp elixirc_paths\(:test\), do: \["lib", "test\/support"\]\n/  # dev\/ holds the screen prototypes; it is not compiled in production\n  defp elixirc_paths(:test), do: ["lib", "test\/support", "dev"]\n  defp elixirc_paths(:dev), do: ["lib", "dev"]\n/' mix.exs
+grep -q 'defp elixirc_paths(:dev), do: \["lib", "dev"\]' mix.exs \
+    || die "Could not add dev/ to the elixirc_paths of mix.exs."
+for env in dev test; do
+    printf '\n# screen prototypes under /dev/prototypes\nconfig :%s, :prototypes, true\n' "$project_name" >> "config/${env}.exs"
+done
+export PROTOTYPE_ROUTES="
+  # screen prototypes with fake data (see \"Prototypes\" in AGENTS.md); dev and test only
+  if Application.compile_env(:${project_name}, :prototypes) do
+    scope \"/dev\", ${web_module}.Prototypes do
+      pipe_through :browser
+
+      live_session :prototypes do
+        live \"/prototypes\", IndexLive
+        live \"/prototypes/frame\", FrameLive
+      end
+    end
+  end
+"
+perl -0pi -e 's/(forward "\/mailbox", Plug.Swoosh.MailboxPreview,\n.*?\n    end\n  end\n)/$1$ENV{PROTOTYPE_ROUTES}/s' "$router"
+grep -q 'live_session :prototypes do' "$router" || die "Could not add the prototype routes to $router."
+live_reload_line=$(grep -n '(controllers|live|components)' config/runtime.exs | cut -d: -f1)
+[[ -n "$live_reload_line" ]] || die "Could not find the live_reload patterns in config/runtime.exs."
+sed -i "${live_reload_line}s/\$/,/" config/runtime.exs
+sed -i "${live_reload_line}a\\        # Screen prototypes\\n        ~r\"dev/.*\\\\.(ex|heex)\$\"E" config/runtime.exs
+grep -qF '~r"dev/.*\.(ex|heex)$"E' config/runtime.exs \
+    || die "Could not add the prototypes to the live_reload patterns."
+sed -i "s|^@source \"../../lib/${project_name}_web\";\$|&\n@source \"../../dev\";|" assets/css/app.css
+grep -qx '@source "../../dev";' assets/css/app.css || die "Could not add dev/ to the Tailwind sources."
+sed -i 's|"{config,lib,test}/\*\*/\*.{heex,ex,exs}"|"{config,dev,lib,test}/**/*.{heex,ex,exs}"|' .formatter.exs
+grep -qF '{config,dev,lib,test}' .formatter.exs || die "Could not add dev/ to .formatter.exs."
+cp templates/credo.exs .credo.exs
+mkdir -p "dev/${project_name}_web/prototypes"
+for file in prototypes.ex prototypes/index_live.ex prototypes/frame_live.ex; do
+    sed "s/__APP_WEB_MODULE__/$web_module/g" "templates/prototypes/$(basename "$file")" \
+        > "dev/${project_name}_web/$file"
+done
+sed "s/__APP_WEB_MODULE__/$web_module/g" templates/prototypes/prototypes_test.exs \
+    > "test/${project_name}_web/prototypes_test.exs"
+
 # production image (Dockerfile; the development one is Dockerfile.dev) and release scripts
 docker compose run --rm --no-deps app_service sh -c "mix phx.gen.release --docker" </dev/null
 [[ -f Dockerfile ]] || die "Could not generate the production Dockerfile."
