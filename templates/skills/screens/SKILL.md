@@ -106,5 +106,5 @@ Present in one round, and wait for the developer's answer before writing:
 Add or update the entries in `docs/ui/screens.md`, in its format: `Specs` links the stories,
 `States` comes from the criteria (empty, error, success), `Flow` links the flow file when there
 is one, and `Status` is `specified`. Then stop: do not design, create tickets or write code.
-Tell the developer the next step: designing the `required` screens (see `design/README.md`)
-or creating the tickets.
+Tell the developer the next step: designing the `required` screens (see "Design system and
+screens" in `AGENTS.md`) or creating the tickets.

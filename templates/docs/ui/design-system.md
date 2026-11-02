@@ -8,7 +8,7 @@ developer provides, and "Design system and screens" in `AGENTS.md` for the setup
 ## Theme
 
 - Source: `assets/css/app.css` (daisyUI themes `light` and `dark`)
-- Generator export: `design/themes/light.css` and `design/themes/dark.css` (the starting point;
+- Generator export: `docs/ui/themes/light.css` and `docs/ui/themes/dark.css` (the starting point;
   later fixes are made only in `app.css`)
 - Identity: <short description of the brand and of each color's role>
 

@@ -247,12 +247,11 @@ keep_blocks db "$use_ecto" README.development.md.tmp
 cat README.development.md.tmp >> README.md
 rm README.development.md.tmp
 
-# design system, screen inventory and pen.dev design folder
-mkdir -p docs/ui design/themes
-touch design/themes/.gitkeep
+# design system, screen inventory and the daisyUI theme export folder
+mkdir -p docs/ui/themes
+touch docs/ui/themes/.gitkeep
 cp templates/docs/ui/design-system.md docs/ui/design-system.md
 sed "s/__APP_MODULE__/$app_module/g" templates/docs/ui/screens.md > docs/ui/screens.md
-cp templates/design/README.md design/README.md
 
 # /screens skill: from the user stories of a spec to docs/ui/screens.md
 mkdir -p .claude/skills/screens

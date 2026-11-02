@@ -53,7 +53,7 @@ once, before the first screen; steps 2 to 7 repeat for each feature.
 | 2. Domain | `GLOSSARY.md`, `docs/adr/` | `/grill-with-docs` | product brief, architecture |
 | 3. Spec | user stories | `/to-spec` | PRD, epics and stories |
 | 4. Screens | `docs/ui/screens.md`, `docs/ui/flows/` | `/screens` | `/screens` |
-| 5. Design | `design/app.pen` | pen.dev or `/prototype` | pen.dev |
+| 5. Design | approved screens | ask the AI | ask the AI |
 | 6. Tickets | vertical slices of work | `/to-tickets` | the stories of step 3 |
 | 7. Implementation | code, tests and review | `/tdd`, `/implement-spec`, `/code-review` | story development, code review |
 
@@ -71,8 +71,6 @@ once, before the first screen; steps 2 to 7 repeat for each feature.
     `npx bmad-method install` in the project folder, on the host (it needs Node.js 20.12+,
     Python 3.10+ and [uv](https://docs.astral.sh/uv/)). Skill names change between BMAD
     versions: ask `bmad-help` which one runs each step
-- **pen.dev**: VS Code with the Pencil extension, only for screens with `Design: required`
-  (see `design/README.md`)
 - **Web Design Guidelines** (optional): `npx skills add vercel-labs/agent-skills --skill
   web-design-guidelines`, to review the screens for accessibility and usability. Its rules
   are generic (some are about React): apply only what fits
@@ -90,11 +88,11 @@ shapes, and the AI does the setup.
    content color), the radius (boxes, fields and selectors), the sizes, the border and the
    effects (depth and noise). Name it `light`
 3. Copy its CSS (`Copy to clipboard` in "Add theme to your CSS file") and save it as
-   `design/themes/light.css`
+   `docs/ui/themes/light.css`
 4. **Dark theme**: start from a dark theme, keep the radius, sizes, border and effects of the
    light one (only the colors change), name it `dark` and save its CSS as
-   `design/themes/dark.css`
-5. Ask the AI: "define the design system with the themes in `design/themes`". It copies the
+   `docs/ui/themes/dark.css`
+5. Ask the AI: "define the design system with the themes in `docs/ui/themes`". It copies the
    variables to `assets/css/app.css` (you do not edit it), measures the text contrast (asking
    before changing any color), fills `docs/ui/design-system.md`, creates the component
    gallery and commits
@@ -103,7 +101,7 @@ shapes, and the AI does the setup.
    in light and dark mode, and ask for changes until you approve it; then the AI marks the
    design system as `defined` and commits
 
-The generator keeps your themes only in the browser, so the files in `design/themes/` are the
+The generator keeps your themes only in the browser, so the files in `docs/ui/themes/` are the
 record of what was exported. After the setup, `app.css` is the source of truth: ask the AI for
 later color changes, or export new themes and repeat steps 5 and 6.
 
@@ -145,18 +143,9 @@ is a single source of truth for the screens.
 
 ### 5. Design
 
-Only for screens with `Design: required`:
-
-1. The first time, create `design/app.pen` with the Pencil extension in VS Code and keep it
-   open (see `design/README.md`)
-2. Ask the AI: "design the screen <name>". The first time, it copies the design system to the
-   design file (variables and components); then it draws the mobile and desktop versions,
-   with real text and the empty and error states, and sets the status to `designed`
-3. Review it in VS Code and ask for changes; when it is right, set the status to `approved`
-   in `docs/ui/screens.md`. Only approved screens are implemented
-
-For a screen with `Design: none` whose layout is unclear, `/prototype` (Matt Pocock) builds a
-few variations on a throwaway route, so you can pick one in the browser.
+Only for screens with `Design: required`: ask the AI to build the screen, review it in the
+browser and ask for changes; when it is right, set the status to `approved` in
+`docs/ui/screens.md`. Only approved screens are implemented.
 
 ### 6. Tickets
 

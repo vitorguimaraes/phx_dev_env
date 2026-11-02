@@ -37,7 +37,6 @@ To build the application (see [step 6](#6-build-the-application)):
 
 - [Claude Code](https://claude.com/claude-code), the AI agent that follows the project conventions
 - Optionally the [`gh`](https://cli.github.com/) CLI, to create the GitHub repository and keep specs and tickets in GitHub issues
-- [VS Code](https://code.visualstudio.com/) with the Pencil extension of [pen.dev](https://pen.dev), only for screens that are designed before being built
 - Only for the BMAD Method: Node.js 20.12+, Python 3.10+ and [uv](https://docs.astral.sh/uv/)
 
 ## How to run
@@ -79,7 +78,7 @@ Then it:
 - generates a production release image (`Dockerfile`, `mix phx.gen.release --docker`); the development image is `Dockerfile.dev`;
 - names the containers, image and network after the project and picks free host ports, so several projects can run at the same time (the ports are registered in `~/.config/phx_dev_env/projects`, so a stopped project keeps its ports);
 - installs the Figtree (interface and text) and Lato (titles) fonts, self-hosted (see `templates/fonts/`);
-- adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `design/` for [`pen.dev`](https://pen.dev) designs (with `design/themes/` for the daisyUI theme export);
+- adds `docs/ui/design-system.md` (defined by the project's first UI task), `docs/ui/screens.md` (screen inventory) and `docs/ui/themes/` for the daisyUI theme export;
 - adds the `/screens` skill for Claude Code (`.claude/skills/screens/`), which turns the user stories of a spec into screens;
 - appends development instructions, including the application building steps, to the project's `README.md`;
 - starts a new git repository.
@@ -124,11 +123,11 @@ The first CI run takes a few minutes (the next ones use the cache); see it in th
 
 The application is built with Claude Code, opened in the project's folder, in seven steps. They are detailed in "Building the application" in the project's `README.md` (from [`templates/README.development.md`](templates/README.development.md)):
 
-1. **Design system** (once, before the first screen): you create a light and a dark theme in the [daisyUI theme generator](https://daisyui.com/theme-generator/), save them in `design/themes/` and ask the AI to define the design system; it applies them, measures the contrast and creates a component gallery for you to approve
+1. **Design system** (once, before the first screen): you create a light and a dark theme in the [daisyUI theme generator](https://daisyui.com/theme-generator/), save them in `docs/ui/themes/` and ask the AI to define the design system; it applies them, measures the contrast and creates a component gallery for you to approve
 2. **Domain**: an interview that records the feature's vocabulary in `GLOSSARY.md` and its decisions in `docs/adr/`
 3. **Spec**: the problem, the solution and the numbered user stories
 4. **Screens**: `/screens <spec>` completes the Given/When/Then acceptance criteria and lists the screens in `docs/ui/screens.md` (and the flow in `docs/ui/flows/`, for two or more screens); you decide which ones are designed first
-5. **Design**: those screens are designed in `design/app.pen` with pen.dev, and you approve them
+5. **Design**: those screens are built and approved in the browser before the rest of the feature
 6. **Tickets**: the spec is split into vertical slices
 7. **Implementation and review**: test-driven, with `make app.precommit` before each commit and a review of each screen
 

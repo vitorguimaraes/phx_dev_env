@@ -93,9 +93,9 @@ check "Credo, Sobelow and mix_audit in mix precommit" bash -c 'grep -q "\"credo\
 check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"
 check "CSP nonce in the root layout" grep -q 'nonce={@csp_nonce}' "lib/${name}_web/components/layouts/root.html.heex"
 check "no template markers or placeholders left" bash -c \
-    '! grep -rqE "(db|auth):(start|end)|__[A-Z_]+__" .env .env.example docker-compose.yaml makefile AGENTS.md README.md .github .claude docs design'
+    '! grep -rqE "(db|auth):(start|end)|__[A-Z_]+__" .env .env.example docker-compose.yaml makefile AGENTS.md README.md .github .claude docs'
 check "/screens skill" grep -q "^name: screens" .claude/skills/screens/SKILL.md
-check "design/themes folder for the generator export" test -f design/themes/.gitkeep
+check "docs/ui/themes folder for the generator export" bash -c 'test -f docs/ui/themes/.gitkeep && test ! -e design'
 check "AGENTS.md conventions and CLAUDE.md" bash -c 'grep -q "^## Development environment (Docker)" AGENTS.md && grep -qx "@AGENTS.md" CLAUDE.md'
 check "Docker names from the project name" bash -c "grep -qx APP_CONTAINER_NAME=${name}_app .env && grep -qx APP_IMAGE_NAME=${name}_app .env"
 check ".env ignored, .env.example created" bash -c 'grep -qx ".env" .gitignore && test -f .env.example'

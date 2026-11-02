@@ -129,7 +129,7 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - Before any UI work, read `docs/ui/design-system.md`. While its status is `not defined`, the
   first UI task is the design system setup, and no screen is built before it:
   1. The developer exports the `light` and `dark` themes from the daisyUI theme generator to
-     `design/themes/light.css` and `design/themes/dark.css` (when they are pasted in the chat,
+     `docs/ui/themes/light.css` and `docs/ui/themes/dark.css` (when they are pasted in the chat,
      save them there first)
   2. Copy only the variables of each file into the matching theme block of
      `assets/css/app.css`; keep the block names, the flags (`default`, `prefersdark`,
@@ -162,43 +162,9 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - Every screen is listed in `docs/ui/screens.md` before it is built:
   - `Design: none`: build it from the specs and the screen entry, set it to `implemented` and
     ask the developer to review it in the browser; only the developer sets `reviewed`
-  - `Design: required`: design it first (see "Design (pen.dev)"); only the developer sets
+  - `Design: required`: its look is decided before it is built; only the developer sets
     `approved`, and only approved screens are implemented
   - Keep the status up to date
-
-## Design (pen.dev)
-
-Screens with `Design: required` are designed in `design/app.pen` with the pen.dev MCP tools
-(the file must be open in VS Code with the Pencil extension; if it does not exist yet, ask the
-developer to create it with Pencil; if the tools say no file is open, ask the developer to
-reconnect the MCP with `/mcp`). These rules override pen.dev's own
-code-generation guide (React, `:root` variables, `bg-[var(--x)]`, Google Fonts links)
-
-- The design file copies the design system from the code, never the opposite. Before the first
-  designed screen, mirror it: variables named like the daisyUI variables, in `light` and `dark`
-  modes (`color-primary`, `color-primary-content`, ..., `color-base-100`, `color-base-content`,
-  `radius-box`, `radius-field`, `radius-selector`, `font-sans` = Figtree,
-  `font-display` = Lato), with the values of `assets/css/app.css` converted from oklch to
-  hex; and a component library mirroring the
-  components table, named `core/<component>` and `layouts/app`. Compare each library
-  component with `/dev/components` using a `browser` node
-- Screens use only variables (never hex colors), library components, spacing in multiples
-  of 4, the typography roles and `icon` nodes from the `lucide` library
-- Each screen has a `<Screen> / mobile` (390px) and a `<Screen> / desktop` (1440px) frame, with
-  real Brazilian Portuguese text and the empty and error states. Set the frame `context` to the
-  route and LiveView (e.g. `/orders · __APP_MODULE__Web.OrderLive.Index`), then set the screen
-  status to `designed`
-- Implementing an approved screen:
-  - `$color-<name>` → `bg-<name>` / `text-<name>` / `border-<name>`; `$radius-box` → `rounded-box`
-  - pen.dev spacing → Tailwind scale (`gap-4`, `p-6`); never arbitrary `[Npx]` values
-  - library components → the function components in `core_components.ex`
-  - `icon` nodes → `<.icon name="lucide-<icon>">`. pen.dev may use older Lucide names: when
-    `deps/lucide/icons/<icon>.svg` does not exist, find the current name in the `aliases` of
-    the JSON files (e.g. `trash-2` → `trash`)
-  - text → `gettext("...")`; never paste pen.dev's HTML export into the code
-- Visual check: with the server running, add a `browser` node next to the frame pointing to
-  `http://localhost:__APP_HOST_PORT__/<route>`, take screenshots of both (mobile and desktop)
-  and fix the differences before `mix precommit`; then set the status to `implemented`
 
 ## Language
 

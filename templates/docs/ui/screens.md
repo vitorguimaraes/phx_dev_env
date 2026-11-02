@@ -3,7 +3,7 @@
 Every screen comes from the user stories of a spec and is listed here before it is built (see
 "Domain, specs and screens" and "Design system and screens" in `AGENTS.md`).
 
-- Design: `none` (built directly from the specs) or `required` (designed in `design/app.pen` first)
+- Design: `none` (built directly from the specs) or `required` (its look is decided and approved before it is built)
 - Status with `Design: required`: `specified` → `designed` → `approved` (set by the developer
   only) → `implemented`
 - Status with `Design: none`: `specified` → `implemented` → `reviewed` (set by the developer
