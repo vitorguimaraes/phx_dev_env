@@ -54,6 +54,7 @@ cleanup() {
     if [[ "$keep" == y ]]; then
         printf "\nKept %s. To remove it:\n" "$project"
         printf "  (cd %s && docker compose down -v) && docker rmi %s_app && rm -rf %s\n" "$project" "$name" "$work"
+        printf "  docker volume ls -q --filter name=^e2e_template_%s_ | xargs -r docker volume rm\n" "$id"
         return
     fi
     printf "\nCleaning up...\n"
@@ -62,6 +63,8 @@ cleanup() {
             (cd "$dir" && docker compose down -v --remove-orphans >/dev/null 2>&1) || true
         fi
     done
+    # volumes created by run.sh before it renamed the template folder (compose names them after it)
+    docker volume ls -q --filter "name=^e2e_template_${id}_" | xargs -r docker volume rm >/dev/null 2>&1 || true
     docker rmi -f "${name}_app" "${name}_release" >/dev/null 2>&1 || true
     rm -rf "$work"
 }
