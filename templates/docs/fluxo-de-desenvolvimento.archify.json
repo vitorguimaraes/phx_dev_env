@@ -1,0 +1,342 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Fluxo de desenvolvimento com o Claude Code",
+    "locale": "pt-BR",
+    "quality_profile": "showcase",
+    "output": "docs/fluxo-de-desenvolvimento.html",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "external": {
+          "label": "Entrada (o que você traz)"
+        },
+        "frontend": {
+          "label": "Skill do template (.claude/skills/)"
+        },
+        "backend": {
+          "label": "Skill do Matt Pocock (plugin)"
+        },
+        "cloud": {
+          "label": "Vem com o Claude Code"
+        },
+        "security": {
+          "label": "Portão ou decisão sua"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "design",
+      "label": "Design system"
+    },
+    {
+      "id": "spec",
+      "label": "Domínio, spec e telas"
+    },
+    {
+      "id": "build",
+      "label": "Protótipo e construção"
+    },
+    {
+      "id": "ship",
+      "label": "Revisão e entrega"
+    }
+  ],
+  "phases": [
+    {
+      "id": "define",
+      "label": "Definir",
+      "fromCol": 0,
+      "toCol": 2
+    },
+    {
+      "id": "gatephase",
+      "label": "Portão",
+      "fromCol": 3,
+      "toCol": 3,
+      "variant": "security"
+    },
+    {
+      "id": "deliver",
+      "label": "Construir e entregar",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "idea",
+    "grill",
+    "screens",
+    "gate",
+    "proto",
+    "tickets",
+    "implement"
+  ],
+  "nodes": [
+    {
+      "id": "themes",
+      "lane": "design",
+      "col": 0,
+      "type": "external",
+      "label": "A · Temas daisyUI",
+      "sublabel": "docs/ui/themes/"
+    },
+    {
+      "id": "ds",
+      "lane": "design",
+      "col": 1,
+      "type": "frontend",
+      "label": "/design-system",
+      "sublabel": "app.css + docs"
+    },
+    {
+      "id": "gallery",
+      "lane": "design",
+      "col": 3,
+      "type": "security",
+      "label": "Aprova a galeria",
+      "sublabel": "→ defined"
+    },
+    {
+      "id": "idea",
+      "lane": "spec",
+      "col": 0,
+      "type": "external",
+      "label": "B · Ideia",
+      "sublabel": "frase ou issue"
+    },
+    {
+      "id": "grill",
+      "lane": "spec",
+      "col": 1,
+      "type": "backend",
+      "label": "/grill-with-docs",
+      "sublabel": "depois /to-spec"
+    },
+    {
+      "id": "screens",
+      "lane": "spec",
+      "col": 2,
+      "type": "frontend",
+      "label": "/screens",
+      "sublabel": "screens.md · flows/"
+    },
+    {
+      "id": "gate",
+      "lane": "spec",
+      "col": 3,
+      "type": "security",
+      "label": "Portão",
+      "sublabel": "design e tela prontos"
+    },
+    {
+      "id": "ready",
+      "lane": "build",
+      "col": 1,
+      "type": "external",
+      "label": "C · Spec pronta",
+      "sublabel": "arquivo ou issue"
+    },
+    {
+      "id": "proto",
+      "lane": "build",
+      "col": 3,
+      "type": "frontend",
+      "label": "/prototype-screen",
+      "sublabel": "/dev/prototypes"
+    },
+    {
+      "id": "tickets",
+      "lane": "build",
+      "col": 4,
+      "type": "backend",
+      "label": "/to-tickets",
+      "sublabel": "tracer bullets"
+    },
+    {
+      "id": "implement",
+      "lane": "build",
+      "col": 5,
+      "type": "backend",
+      "label": "/implement",
+      "sublabel": "/tdd · /code-review"
+    },
+    {
+      "id": "retro",
+      "lane": "ship",
+      "col": 2,
+      "type": "backend",
+      "label": "/retro",
+      "sublabel": "melhora o ambiente"
+    },
+    {
+      "id": "pr",
+      "lane": "ship",
+      "col": 3,
+      "type": "backend",
+      "label": "/pr",
+      "sublabel": "CI verde"
+    },
+    {
+      "id": "secreview",
+      "lane": "ship",
+      "col": 4,
+      "type": "cloud",
+      "label": "/security-review",
+      "sublabel": "diff com código"
+    },
+    {
+      "id": "review",
+      "lane": "ship",
+      "col": 5,
+      "type": "security",
+      "label": "Você confere",
+      "sublabel": "→ reviewed"
+    }
+  ],
+  "edges": [
+    {
+      "id": "themes-ds",
+      "from": "themes",
+      "to": "ds",
+      "label": "salva"
+    },
+    {
+      "id": "ds-gallery",
+      "from": "ds",
+      "to": "gallery",
+      "label": "galeria"
+    },
+    {
+      "id": "gallery-gate",
+      "from": "gallery",
+      "to": "gate",
+      "label": "defined",
+      "variant": "security"
+    },
+    {
+      "id": "idea-grill",
+      "from": "idea",
+      "to": "grill"
+    },
+    {
+      "id": "grill-screens",
+      "from": "grill",
+      "to": "screens",
+      "label": "mesma conversa",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ready-screens",
+      "from": "ready",
+      "to": "screens",
+      "label": "conversa nova",
+      "role": "branch"
+    },
+    {
+      "id": "screens-gate",
+      "from": "screens",
+      "to": "gate",
+      "label": "specified",
+      "variant": "emphasis"
+    },
+    {
+      "id": "gate-proto",
+      "from": "gate",
+      "to": "proto",
+      "label": "required",
+      "variant": "security"
+    },
+    {
+      "id": "gate-tickets",
+      "from": "gate",
+      "to": "tickets",
+      "label": "none",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "proto-tickets",
+      "from": "proto",
+      "to": "tickets",
+      "label": "approved",
+      "variant": "emphasis"
+    },
+    {
+      "id": "tickets-implement",
+      "from": "tickets",
+      "to": "implement",
+      "label": "um por vez",
+      "variant": "emphasis"
+    },
+    {
+      "id": "implement-review",
+      "from": "implement",
+      "to": "review",
+      "label": "implemented",
+      "variant": "emphasis"
+    },
+    {
+      "id": "review-secreview",
+      "from": "review",
+      "to": "secreview",
+      "label": "reviewed"
+    },
+    {
+      "id": "secreview-pr",
+      "from": "secreview",
+      "to": "pr"
+    },
+    {
+      "id": "pr-retro",
+      "from": "pr",
+      "to": "retro"
+    },
+    {
+      "id": "retro-idea",
+      "from": "retro",
+      "to": "idea",
+      "label": "próxima ideia",
+      "variant": "dashed",
+      "role": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "O que a IA lê e escreve",
+      "items": [
+        "Design: docs/ui/themes/ → assets/css/app.css e docs/ui/design-system.md",
+        "Domínio e spec: GLOSSARY.md, docs/adr/, a spec (issue ou .scratch/<feature>/spec.md)",
+        "Telas: docs/ui/screens.md (status) e docs/ui/flows/",
+        "Protótipos: dev/<app>_web/prototypes/ → lib/<app>_web/components/",
+        "Tickets: issues ou .scratch/<feature>/issues/; código em lib/, priv/repo/migrations/ e test/"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "De onde vem, no template",
+      "items": [
+        "templates/skills/*/SKILL.md → .claude/skills/",
+        "templates/AGENTS.conventions.md → AGENTS.md (o CLAUDE.md importa)",
+        "templates/docs/ui/ → docs/ui/; templates/prototypes/ → dev/<app>_web/",
+        "templates/ci.yml, dependabot.yml e gitleaks.toml → .github/ e .gitleaks.toml",
+        "templates/README.development.md → README.md do projeto"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Verificações",
+      "items": [
+        "make app.precommit antes de cada commit (Credo, Sobelow, deps.audit, hex.audit, testes)",
+        "CI em push e PR: as mesmas verificações e o gitleaks",
+        "Trivy na imagem de produção (master e semanal) e Dependabot semanal",
+        "/next-step, a qualquer momento, diz onde o projeto está e o próximo passo"
+      ]
+    }
+  ]
+}
