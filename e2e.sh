@@ -93,7 +93,7 @@ check "fonts installed" bash -c 'ls priv/static/fonts/{figtree,lato}-*.woff2 && 
 check "pt_BR default locale" grep -q 'default_locale: "pt_BR"' config/config.exs
 check "pt_BR Ecto errors" test -f priv/gettext/pt_BR/LC_MESSAGES/errors.po
 check "Credo, Sobelow, mix_audit and hex.audit in mix precommit" bash -c 'grep -q "\"credo\"," mix.exs && grep -q "\"sobelow --skip --exit low --ignore Vuln\"" mix.exs && grep -q "\"deps.audit\"" mix.exs && grep -q "\"hex.audit\"" mix.exs'
-check "CI security jobs and Dependabot" bash -c 'grep -q "mix hex.audit" .github/workflows/ci.yml && grep -q "gitleaks" .github/workflows/ci.yml && grep -q "trivy-action" .github/workflows/ci.yml && grep -q "package-ecosystem: mix" .github/dependabot.yml && grep -q "secret_key_base" .gitleaks.toml'
+check "CI security jobs and Dependabot" bash -c 'grep -q "mix hex.audit" .github/workflows/ci.yml && grep -q "gitleaks" .github/workflows/ci.yml && grep -q "aquasec/trivy" .github/workflows/ci.yml && grep -q "package-ecosystem: mix" .github/dependabot.yml && grep -q "secret_key_base" .gitleaks.toml'
 check "production Dockerfile upgrades the Debian packages" bash -c \
     "sed -n '/AS final/,\$p' Dockerfile | grep -A1 '^RUN apt-get update' | grep -q 'apt-get upgrade -y'"
 check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"
