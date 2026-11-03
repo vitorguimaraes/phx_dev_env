@@ -6,19 +6,27 @@ argument-hint: <spec file, issue number or story file>
 
 # Screens
 
-This step sits between the spec and the prototypes: it turns user stories, written with any
-method (`/to-spec`, BMAD stories, a hand-written file), into entries of `docs/ui/screens.md`.
-It decides which screens exist and what each one does; it does not prototype or build them.
+This step closes the spec and comes before the prototypes: it turns the user stories of a spec
+into entries of `docs/ui/screens.md`. The spec comes from `/to-spec`, in the same conversation
+as `/grill-with-docs`, or was written outside this workflow (a file or an issue brought by the
+developer); then this step runs in its own conversation. It decides which screens exist and
+what each one does; it does not prototype or build them.
 
 ## 1. Read the inputs
 
 - The spec given as argument: a file (read it in full), a GitHub issue
   (`gh issue view <number> --comments`) or a story file. Without an argument, ask which spec;
   never guess
-- `GLOSSARY.md` and `docs/adr/`, when they exist: use their terms
+- `GLOSSARY.md` and `docs/adr/`, when they exist: use their terms. When there is no
+  `GLOSSARY.md`, or the spec uses terms that it does not have, tell the developer and recommend
+  `/grill-with-docs <spec>` first; continue only if they choose to, and ask about each new term
+  instead of naming it yourself
+- A spec written outside this workflow may lack numbered stories: number them (keeping the
+  text) and confirm the numbering with the developer before using it in `Specs`
 - `docs/ui/screens.md`, `docs/ui/flows/` and the router: the screens and routes that already exist
 - `docs/ui/design-system.md`: while its status is `not defined`, the screens can be listed, but
-  tell the developer that none is prototyped or built before the design system
+  tell the developer that none is prototyped or built before the design system and that
+  `/design-system` can run in parallel, in another conversation
 
 ## 2. Complete the acceptance criteria
 
@@ -109,5 +117,8 @@ Add or update the entries in `docs/ui/screens.md`, in its format and in Brazilia
 (the field names and status values stay in English): `Specs` links the stories,
 `States` comes from the criteria (empty, error, success), `Flow` links the flow file when there
 is one, and `Status` is `specified`. Then stop: do not prototype, create tickets or write code.
-Tell the developer the next step: prototyping the `required` screens with
-`/prototype-screen <screen>` or creating the tickets.
+Tell the developer that the spec is now defined and the next steps, each in a new
+conversation (`/clear`): setting up the design system with `/design-system`, while it is
+`not defined`; prototyping each `required` screen with `/prototype-screen <screen>`
+and, once all of them are `approved` (or right away, when none is `required`), creating the
+tickets with `/to-tickets <spec>`.

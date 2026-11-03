@@ -2,9 +2,9 @@
 
 Status: not defined   <!-- not defined | defined (só depois que a pessoa desenvolvedora aprova o /dev/components) -->
 
-Definido pela primeira tarefa de UI do projeto: veja "1. Design system" no `README.md` para o que
-a pessoa desenvolvedora fornece, e "Design system and screens" no `AGENTS.md` para os passos da
-configuração.
+Definido pela primeira tarefa de UI do projeto, com a skill `/design-system`: veja
+"1. Design system" no `README.md` para o que a pessoa desenvolvedora fornece, e
+`.claude/skills/design-system/SKILL.md` para os passos da configuração.
 
 ## Tema
 

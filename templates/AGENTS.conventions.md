@@ -122,37 +122,45 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
     path and, when they can happen, the empty and error states
   - specs with two or more screens get a flow in `docs/ui/flows/<spec-slug>.md`
   - the developer decides which screens are `Prototype: required`
-- Tickets that build a screen point to its entry in `docs/ui/screens.md`
+- A spec is defined once its screens are listed. Its `required` screens are then prototyped
+  and approved, and only after that is it broken into tickets
 - Every acceptance criterion of a screen has a LiveView test
+- When the developer asks what to do next or where the project stands, use the `next-step`
+  skill (`.claude/skills/next-step/SKILL.md`): it reads the state and recommends one skill
+
+## Tickets (tracer bullets)
+
+- Every ticket is a tracer bullet: a thin path through every layer it needs (migration,
+  schema and changeset, context function, route and LiveView rendering the approved
+  component, and the LiveView tests of its criteria), landed with `mix precommit` green and
+  visible in the browser. Never slice by layer (one ticket for the schemas, another for the
+  LiveViews). The only exceptions are prefactoring (make the change easy first) and wide
+  refactors, sequenced as expand, migrate and contract
+- The first ticket of a spec is its skeleton: the main path of its central screen, with the
+  smallest context function that feeds it and the test of the main criterion. It blocks the
+  other tickets of that screen
+- The tickets of a screen are sliced by its acceptance criteria, which are also its prototype
+  states: each ticket points to the screen's entry in `docs/ui/screens.md`, lists the
+  Given/When/Then criteria it closes and, for `Prototype: required`, the states to compare
+  (`/dev/prototypes/<path>?state=<state>`). Every criterion belongs to exactly one ticket
+- A ticket is done when its criteria pass as LiveView tests and the real route looks like the
+  prototype states it lists
+- A screen moves to `implemented` only when the last ticket that covers it is closed; until
+  then it keeps its status
+- Build each ticket test-first with `/tdd`: one test at an agreed seam (the context's public
+  functions and the LiveView), the minimal code that passes it, then the next test. The first
+  cycle is the ticket's tracer bullet; refactoring belongs to `/code-review`
 
 ## Design system and screens
 
 - Before any UI work, read `docs/ui/design-system.md`. While its status is `not defined`, the
-  first UI task is the design system setup, and no screen is built before it:
-  1. The developer exports the `light` and `dark` themes from the daisyUI theme generator to
-     `docs/ui/themes/light.css` and `docs/ui/themes/dark.css` (when they are pasted in the chat,
-     save them there first)
-  2. Copy only the variables of each file into the matching theme block of
-     `assets/css/app.css`; keep the block names, the flags (`default`, `prefersdark`,
-     `color-scheme`) and the plugin path (`daisyui/packages/bundle/daisyui-theme`, not the
-     generator's `daisyui/theme`). When a file has a variable that the blocks do not have, ask
-     before adding it. From then on `app.css` is the source of truth: later color fixes are
-     made only there
-  3. Measure the contrast of every pair in the document's table, in both themes, with a script:
-     convert the oklch colors to sRGB and compute the WCAG ratio (for `base-content/70`, blend
-     it over the background first); never estimate by eye. When a pair is below 4.5:1, propose
-     a close shade that passes and ask before changing it
-  4. The fonts are already installed: Figtree (`--font-sans`) and Lato (`--font-display`) in
-     `priv/static/fonts/` and `app.css`. Do not add or replace fonts without asking
-  5. Fill the identity, contrast values, spacing, icons and components sections, and align the
-     titles of the existing components (e.g. the `<h1>` of `<.header>`) with the typography roles
-  6. Create a dev-only `/dev/components` LiveView (`__APP_MODULE__Web.Prototypes.ComponentsLive`
-     in `dev/__APP___web/prototypes/`, routed in the `:prototypes` live session) showing every
-     component, text role, theme color and icon size
-  7. Run `mix precommit`, commit (`🎨 style: set up design system`) and ask the developer to
-     review `/dev/components` in light and dark mode. Apply the requested changes; only when
-     the developer approves it, set the status to `defined` and commit
-     (`📝 docs(ui): approve design system`)
+  first UI task is the design system setup, and no screen is prototyped or built before it.
+  Set it up and change it with the `design-system` skill (`.claude/skills/design-system/SKILL.md`;
+  agents without skills follow that file), from the daisyUI theme generator export in
+  `docs/ui/themes/` (CSS files or a design system Markdown file). Only the developer sets the
+  status to `defined`, after reviewing `/dev/components` in light and dark mode
+- `assets/css/app.css` is the source of truth of the themes; the files in `docs/ui/themes/` are
+  only the record of what was exported
 - Use only the typography roles of the document, never ad hoc text sizes
 - Text contrast is at least 4.5:1; after changing a theme color, measure again and update the table
 - Use `font-display` only for page and section titles; everything else uses the default
@@ -186,6 +194,8 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - After the approval, the screen's markup becomes a function component in
   `__APP_WEB__/components/<feature>_components.ex`: the real LiveView renders it with the
   real data and the prototype with its fake data. The real LiveView never copies the markup
+- A prototype never decides a rule: when a change requested in its review alters an
+  acceptance criterion, update the spec and the screen's entry before the approval
 - When a screen changes, change its component and keep the prototype's states in sync with
   the acceptance criteria
 

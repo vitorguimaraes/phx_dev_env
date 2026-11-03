@@ -12,6 +12,8 @@ e os valores de status ficam em inglês: as skills e o `AGENTS.md` dependem dele
 - Status com `Prototype: none`: `specified` → `implemented` → `reviewed` (definido só pela
   pessoa desenvolvedora, depois de conferir a tela no navegador)
 - Approved: o commit do protótipo aprovado, registrado quando o status vira `approved`
+- `implemented`: só quando fecha o último ticket da tela (os tickets são tracer bullets, um
+  grupo de critérios de aceite por vez; veja "Tickets" no `AGENTS.md`)
 
 ## <Nome da tela>
 

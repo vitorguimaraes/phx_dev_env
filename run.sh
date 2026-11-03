@@ -255,14 +255,15 @@ touch docs/ui/themes/.gitkeep
 cp templates/docs/ui/design-system.md docs/ui/design-system.md
 sed "s/__APP_MODULE__/$app_module/g" templates/docs/ui/screens.md > docs/ui/screens.md
 
-# /screens skill: from the user stories of a spec to docs/ui/screens.md
-mkdir -p .claude/skills/screens
-sed "s/__APP_MODULE__/$app_module/g" templates/skills/screens/SKILL.md > .claude/skills/screens/SKILL.md
-
-# /prototype-screen skill: from a screen entry to a prototype under /dev/prototypes
-mkdir -p .claude/skills/prototype-screen
-sed -e "s/__APP_MODULE__/$app_module/g; s/__APP_HOST_PORT__/$APP_HOST_PORT/g; s/__APP__/$project_name/g" \
-    templates/skills/prototype-screen/SKILL.md > .claude/skills/prototype-screen/SKILL.md
+# Claude Code skills of the building workflow: /design-system (themes, contrast and the
+# components gallery), /screens (user stories to docs/ui/screens.md), /prototype-screen (a screen
+# entry to a prototype under /dev/prototypes) and /next-step (which step and skill come next)
+for skill_dir in templates/skills/*/; do
+    skill=$(basename "$skill_dir")
+    mkdir -p ".claude/skills/$skill"
+    sed -e "s/__APP_MODULE__/$app_module/g; s/__APP_HOST_PORT__/$APP_HOST_PORT/g; s/__APP__/$project_name/g" \
+        "${skill_dir}SKILL.md" > ".claude/skills/$skill/SKILL.md"
+done
 
 # fonts: Figtree (--font-sans) and Lato (--font-display), self-hosted, after the @source lines
 mkdir -p priv/static/fonts

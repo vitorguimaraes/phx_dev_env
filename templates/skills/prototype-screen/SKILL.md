@@ -19,7 +19,7 @@ behaves; it does not touch contexts, schemas or migrations.
 - Its spec (the `Specs` field) and the Given/When/Then criteria of its stories, and its flow in
   `docs/ui/flows/`, when there is one
 - `docs/ui/design-system.md`: while its status is `not defined`, stop and tell the developer
-  that the design system comes first
+  that the design system comes first, with `/design-system`
 - `GLOSSARY.md`, `core_components.ex` and `lib/__APP___web/components/`: reuse what exists
 - The existing prototypes in `dev/__APP___web/prototypes/` and the `:prototypes` live session
   of the router
@@ -55,7 +55,11 @@ behaves; it does not touch contexts, schemas or migrations.
 3. Give the developer the links: `http://localhost:__APP_HOST_PORT__/dev/prototypes/<path>`,
    one per state, and the mobile and desktop frames (the toolbar has them too). Ask them to
    check both themes
-4. Apply the requested changes with the same checks; only the developer sets `approved`
+4. Apply the requested changes with the same checks; only the developer sets `approved`.
+   When a change alters a rule (a new state, another error message, other data on the
+   screen), update the acceptance criteria in the spec (edit the file, or ask before adding a
+   comment to the issue) and the screen's entry in `docs/ui/screens.md` before the approval:
+   the prototype never decides a rule on its own
 
 ## 4. After the approval
 
@@ -73,4 +77,9 @@ commit of the prototype) in the screen's entry and promote the markup:
 - Run `mix precommit` (the prototype must look the same) and commit
   (`♻️ refactor(ui): extract <screen> component`)
 
-Then stop: the real LiveView, contexts and tests belong to the tickets.
+Then stop: the real LiveView, contexts and tests belong to the tickets. Tell the developer how
+the screen's states map to tracer-bullet tickets (see "Tickets" in `AGENTS.md`): the main
+state is the skeleton, and each other state, with its criteria, is a ticket blocked by it
+(e.g. `filled` → skeleton; `empty`; `error` with the validation criteria). When every
+`required` screen of the spec is `approved`, tell the developer that the next step is
+`/to-tickets <spec>` in a new conversation, and that this mapping is a starting point for it.
