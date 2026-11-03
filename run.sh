@@ -226,11 +226,14 @@ mkdir -p .githooks
 cp templates/commit-msg .githooks/commit-msg
 chmod +x .githooks/commit-msg
 
-# CI: the mix precommit checks on every push and pull request
+# CI: the mix precommit checks on every push and pull request, plus secrets (gitleaks) and the
+# production image (Trivy); Dependabot for the mix and GitHub Actions updates
 mkdir -p .github/workflows
 sed -e "s/__POSTGRES_USER__/${POSTGRES_USER:-}/; s/__POSTGRES_PASSWORD__/${POSTGRES_PASSWORD:-}/" \
     templates/ci.yml > .github/workflows/ci.yml
 keep_blocks db "$use_ecto" .github/workflows/ci.yml
+cp templates/dependabot.yml .github/dependabot.yml
+cp templates/gitleaks.toml .gitleaks.toml
 
 # Brazilian Portuguese as the default locale, with the Ecto errors translated
 export GETTEXT_CONFIG="# Brazilian Portuguese as the default locale
@@ -276,9 +279,13 @@ sed -i "${last_source}r templates/fonts/fonts.css" assets/css/app.css
 perl -0pi -e 's/(  defp deps do\n    \[\n)/$1      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},\n      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},\n      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},\n      {:mix_test_watch, "~> 1.4", only: [:dev, :test], runtime: false},\n/' mix.exs
 grep -q '{:mix_audit,' mix.exs || die "Could not add the dev dependencies to mix.exs."
 
-# Credo, Sobelow and the vulnerable dependencies check in mix precommit (the CI runs the same checks)
+# Credo, Sobelow and the vulnerable and retired dependencies checks in mix precommit (the CI runs
+# the same checks). hex.audit comes first: after compile, Mix prunes the code paths and no longer
+# finds the tasks of the Hex archive
 perl -0pi -e 's/"format", "test"\]/"format", "credo", "sobelow --skip --exit low --ignore Vuln", "deps.audit", "test"]/' mix.exs
-grep -q '"deps.audit"' mix.exs || die "Could not add Credo, Sobelow and mix_audit to mix precommit."
+perl -0pi -e 's/(precommit: \[\s*)"compile --warnings-as-errors"/$1"hex.audit", "compile --warnings-as-errors"/' mix.exs
+grep -q '"deps.audit"' mix.exs && grep -q '"hex.audit", "compile' mix.exs ||
+    die "Could not add Credo, Sobelow, mix_audit and hex.audit to mix precommit."
 
 # Lucide icons instead of Heroicons (see templates/icons)
 lucide_version="1.66.0"

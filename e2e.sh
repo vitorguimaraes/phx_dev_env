@@ -92,16 +92,17 @@ check "generator templates with Lucide" grep -rq 'lucide-' priv/templates
 check "fonts installed" bash -c 'ls priv/static/fonts/{figtree,lato}-*.woff2 && grep -q "font-family: \"Figtree\"" assets/css/app.css && grep -q -- "--font-display: \"Lato\"" assets/css/app.css'
 check "pt_BR default locale" grep -q 'default_locale: "pt_BR"' config/config.exs
 check "pt_BR Ecto errors" test -f priv/gettext/pt_BR/LC_MESSAGES/errors.po
-check "Credo, Sobelow and mix_audit in mix precommit" bash -c 'grep -q "\"credo\"," mix.exs && grep -q "\"sobelow --skip --exit low --ignore Vuln\"" mix.exs && grep -q "\"deps.audit\"" mix.exs'
+check "Credo, Sobelow, mix_audit and hex.audit in mix precommit" bash -c 'grep -q "\"credo\"," mix.exs && grep -q "\"sobelow --skip --exit low --ignore Vuln\"" mix.exs && grep -q "\"deps.audit\"" mix.exs && grep -q "\"hex.audit\"" mix.exs'
+check "CI security jobs and Dependabot" bash -c 'grep -q "mix hex.audit" .github/workflows/ci.yml && grep -q "gitleaks" .github/workflows/ci.yml && grep -q "trivy-action" .github/workflows/ci.yml && grep -q "package-ecosystem: mix" .github/dependabot.yml && grep -q "secret_key_base" .gitleaks.toml'
 check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"
 check "CSP nonce in the root layout" grep -q 'nonce={@csp_nonce}' "lib/${name}_web/components/layouts/root.html.heex"
 check "no template markers or placeholders left" bash -c \
     '! grep -rqE "(db|auth):(start|end)|__[A-Z_]+__" .env .env.example docker-compose.yaml makefile AGENTS.md README.md .github .claude docs'
 check "README in Brazilian Portuguese, without the Phoenix one" bash -c "[[ \$(head -1 README.md) == '# ${module}' ]] && grep -q '^## Construção da aplicação' README.md && ! grep -q 'To start your Phoenix server' README.md"
-check "/screens skill" grep -q "^name: screens" .claude/skills/screens/SKILL.md
 check "/design-system skill" bash -c "grep -q '^name: design-system' .claude/skills/design-system/SKILL.md && grep -q '${module}Web.Prototypes.ComponentsLive' .claude/skills/design-system/SKILL.md"
-check "/prototype-screen skill" bash -c "grep -q '^name: prototype-screen' .claude/skills/prototype-screen/SKILL.md && grep -q 'dev/${name}_web/prototypes/' .claude/skills/prototype-screen/SKILL.md"
+check "/screens skill" grep -q "^name: screens" .claude/skills/screens/SKILL.md
 check "/next-step skill" grep -q "^name: next-step" .claude/skills/next-step/SKILL.md
+check "/prototype-screen skill" bash -c "grep -q '^name: prototype-screen' .claude/skills/prototype-screen/SKILL.md && grep -q 'dev/${name}_web/prototypes/' .claude/skills/prototype-screen/SKILL.md"
 check "docs/ui/themes folder for the generator export" bash -c 'test -f docs/ui/themes/.gitkeep && test ! -e design'
 check "prototype files" bash -c "test -f dev/${name}_web/prototypes.ex && test -f dev/${name}_web/prototypes/index_live.ex && test -f dev/${name}_web/prototypes/frame_live.ex && test -f test/${name}_web/prototypes_test.exs"
 check "prototype routes in dev and test" bash -c "grep -q 'live_session :prototypes do' lib/${name}_web/router.ex && grep -q ':prototypes, true' config/dev.exs && grep -q ':prototypes, true' config/test.exs && ! grep -q ':prototypes' config/prod.exs"

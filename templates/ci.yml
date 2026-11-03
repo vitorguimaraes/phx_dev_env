@@ -4,6 +4,9 @@ on:
   push:
     branches: [main, master]
   pull_request:
+  # weekly, because new vulnerabilities show up without any change in the code
+  schedule:
+    - cron: "0 6 * * 1"
 
 jobs:
   checks:
@@ -48,4 +51,37 @@ jobs:
       - run: mix credo
       - run: mix sobelow --skip --exit low --ignore Vuln
       - run: mix deps.audit
+      - run: mix hex.audit
       - run: mix test
+
+  # secrets committed by mistake (API keys, tokens, passwords), in the whole history
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --redact --config /repo/.gitleaks.toml
+
+  # known vulnerabilities in the production image (OS packages and runtime); it also checks
+  # that the release Dockerfile still builds. Slow, so not on pull requests
+  image:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: app:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # pinned by commit: v0.36.0
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: app:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"

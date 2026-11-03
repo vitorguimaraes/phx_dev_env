@@ -28,7 +28,8 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 - Commit at the end of each completed task, only after
   `docker exec __APP_CONTAINER__ mix precommit` passes. Never commit with failing checks.
   It compiles with warnings as errors, formats, runs Credo, Sobelow, `mix deps.audit`
-  (dependencies with known vulnerabilities; needs internet) and the tests
+  (dependencies with known vulnerabilities; needs internet), `mix hex.audit` (dependencies
+  retired by their authors) and the tests
 - CI (`.github/workflows/ci.yml`) runs the same checks on every push and pull request;
   when adding a check to `mix precommit`, add it to the CI too
 - Make atomic commits: one logical change per commit; split independent changes
@@ -89,8 +90,18 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
 
 - Fix the issues reported by Credo and Sobelow; **never** disable a check, add
   `# sobelow_skip` or change `.sobelow-skips` without asking the developer
-- When `mix deps.audit` reports a vulnerable dependency, update it (`mix deps.update <dep>`);
-  if there is no fixed version yet, tell the developer instead of ignoring it
+- When `mix deps.audit` reports a vulnerable dependency, or `mix hex.audit` a retired one,
+  update it (`mix deps.update <dep>`); if there is no fixed version yet, tell the developer
+  instead of ignoring it
+- Before a pull request (or a direct push), run the `/security-review` skill when the changes
+  touch `lib/`, `config/` or `priv/repo/migrations/`; fix what it finds, and ask the developer
+  when a fix changes a rule. `/implement-spec` runs it once, at the end
+- **Never** commit secrets (API keys, tokens, passwords): they go in `.env` and are read in
+  `config/runtime.exs`. When the CI's gitleaks job finds one, tell the developer to revoke it
+  first (it is already on GitHub), and only then remove it from the code
+- The CI also scans the production image with Trivy (on `master` and weekly). When it fails,
+  update the base images of the `Dockerfile` (the `BUILDER_IMAGE` and `RUNNER_IMAGE` versions);
+  when there is no fixed version yet, tell the developer
 - The Content-Security-Policy is set by `__APP_WEB__/plugs/content_security_policy.ex`, with a
   new nonce per request. Inline scripts need `nonce={@csp_nonce}`; prefer code in
   `assets/js` (or LiveView colocated hooks) and **never** use inline event handlers

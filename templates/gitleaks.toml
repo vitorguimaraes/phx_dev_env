@@ -1,0 +1,12 @@
+# gitleaks (CI job "secrets"): the default rules, plus one narrow exception
+[extend]
+useDefault = true
+
+# the secret_key_base that phx.new writes in the dev and test configs is only used locally;
+# production reads SECRET_KEY_BASE from the environment (config/runtime.exs)
+[[allowlists]]
+description = "Phoenix dev and test secret_key_base"
+condition = "AND"
+paths = ['''^config/(dev|test)\.exs$''']
+regexTarget = "line"
+regexes = ['''^\s*secret_key_base:''']
