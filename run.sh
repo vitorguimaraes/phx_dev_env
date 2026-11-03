@@ -435,6 +435,11 @@ sed "s/__APP_WEB_MODULE__/$web_module/g" templates/prototypes/prototypes_test.ex
 # production image (Dockerfile; the development one is Dockerfile.dev) and release scripts
 docker compose run --rm --no-deps app_service sh -c "mix phx.gen.release --docker" </dev/null
 [[ -f Dockerfile ]] || die "Could not generate the production Dockerfile."
+# upgrade the Debian packages of the final stage (the runner image is pinned to a date and
+# Trivy fails the CI on its fixed CVEs)
+sed -i '/AS final/,/apt-get install/ s/^RUN apt-get update \\$/RUN apt-get update \\\n  \&\& apt-get upgrade -y \\/' Dockerfile
+sed -n '/AS final/,$p' Dockerfile | grep -A1 '^RUN apt-get update' | grep -q 'apt-get upgrade -y' \
+    || die "Could not add apt-get upgrade to the production Dockerfile."
 
 # format the changed files
 docker compose run --rm --no-deps app_service sh -c "mix format"
