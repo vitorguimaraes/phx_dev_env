@@ -281,7 +281,7 @@ perl -0pi -e 's/"format", "test"\]/"format", "credo", "sobelow --skip --exit low
 grep -q '"deps.audit"' mix.exs || die "Could not add Credo, Sobelow and mix_audit to mix precommit."
 
 # Lucide icons instead of Heroicons (see templates/icons)
-lucide_version="1.56.0"
+lucide_version="1.66.0"
 
 # sed expressions from the hero -> lucide map (whole icon names only)
 icon_sed_args=()
