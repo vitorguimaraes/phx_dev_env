@@ -30,7 +30,8 @@ Acesse [`localhost:__APP_HOST_PORT__`](http://localhost:__APP_HOST_PORT__) (`APP
   dependências e das actions; a CI valida cada um
 
 As mensagens de commit seguem o formato `<gitmoji> <type>(<scope>): <description>` e são validadas
-pelo `.githooks/commit-msg`. As convenções do projeto estão no `AGENTS.md`.
+pelo `.githooks/commit-msg`. As convenções do projeto estão no `AGENTS.md`. O que cada ferramenta faz está
+em "Stack e ferramentas".
 
 ## Imagem de produção
 
@@ -86,6 +87,79 @@ Para conectar um cliente (DBeaver, por exemplo), use os valores do `.env`:
 - Banco, usuário e senha: `POSTGRES_DB`, `POSTGRES_USER` e `POSTGRES_PASSWORD`
 <!-- db:end -->
 
+## Stack e ferramentas
+
+O que o projeto usa, para que serve e quando entra em ação. As versões exatas estão no `mix.lock`.
+
+### Base
+
+| Item | Para que serve | Quando é usado |
+|---|---|---|
+| Elixir e Phoenix 1.8 | linguagem e framework web | sempre |
+| Phoenix LiveView | telas interativas renderizadas no servidor, sem uma SPA em JavaScript | em todas as telas; o JS próprio vai em colocated hooks |
+| Bandit | servidor HTTP do Phoenix | ao rodar `make app` e na release |
+<!-- db:start -->
+| Ecto, `ecto_sql` e Postgrex | schemas, changesets, queries e migrations sobre o PostgreSQL | em todo acesso a dados |
+| PostgreSQL 18 | banco de dados, no serviço `db_service` | em dev e test (container) e na CI (serviço do job) |
+| `bcrypt_elixir` (com `--auth`) | hash das senhas da autenticação gerada | ao cadastrar e ao fazer login |
+<!-- db:end -->
+| Swoosh | envio de e-mails; em dev, as mensagens aparecem em `/dev/mailbox` | nos e-mails da autenticação e nos que você criar |
+| Req | cliente HTTP | ao chamar APIs externas; o Swoosh o usa em produção |
+| Gettext | traduções; o locale padrão é `pt_BR`, com os erros do Ecto traduzidos | em todo texto da interface |
+| Jason | JSON | nas APIs, nos logs e no LiveView |
+| Telemetry e LiveDashboard | métricas da app em `/dev/dashboard` | em dev, para investigar desempenho |
+| `dns_cluster` | conecta os nós da release por DNS | só em produção, se houver mais de um nó |
+
+### Interface
+
+| Item | Para que serve | Quando é usado |
+|---|---|---|
+| Tailwind CSS | estilos por classes utilitárias, pelo binário standalone (sem Node) | ao gerar os assets (`mix setup`, `make app`) |
+| daisyUI 5 | componentes e temas sobre o Tailwind; vem do GitHub, fixado por tag no `mix.lock` | nos componentes; os temas vêm do gerador do daisyUI (passo 1) |
+| esbuild | empacota o `assets/js`, também sem Node | ao gerar os assets |
+| Lucide | ícones (`<.icon name="lucide-...">`) no lugar dos Heroicons, inclusive nos geradores `mix phx.gen.*` | em toda tela com ícones |
+| Figtree e Lato | fontes da interface e dos títulos, servidas pelo próprio projeto (sem Google Fonts, o que mantém a CSP restrita) | sempre |
+| `phoenix_live_reload` | recarrega o navegador quando um arquivo muda | em dev |
+| `/dev/components` e `/dev/prototypes` | a galeria do design system e os protótipos das telas, compilados só em dev e test | nos passos 1 e 5 |
+
+### Qualidade e testes
+
+| Item | Para que serve | Quando é usado |
+|---|---|---|
+| ExUnit, `Phoenix.LiveViewTest` e LazyHTML | testes de unidade e de LiveView; o LazyHTML lê o HTML renderizado | `make app.test`, no `precommit` e na CI |
+| `mix_test_watch` | roda os testes a cada mudança | `make app.test.watch` |
+| `compile --warnings-as-errors` | transforma warnings em erros, inclusive funções que não existem ou foram descontinuadas | no `precommit` e na CI |
+| `mix format` | formatação padrão do Elixir | no `precommit` e no `make app.test` |
+| Credo | consistência e legibilidade do código | no `precommit` e na CI; `make app.credo` roda no modo strict |
+| `.githooks/commit-msg` | valida o formato `<gitmoji> <type>(<scope>): <description>` | a cada commit |
+
+### Segurança
+
+| Item | Para que serve | Quando é usado |
+|---|---|---|
+| Sobelow | análise estática de segurança do Phoenix: XSS, SQL injection, configurações inseguras | no `precommit` e na CI; as vulnerabilidades de dependências ficam com o `deps.audit` |
+| `mix deps.audit` (mix_audit) | confere o `mix.lock` contra a base de vulnerabilidades conhecidas | no `precommit` e na CI (precisa de internet) |
+| `mix hex.audit` | avisa sobre pacotes retirados pelos autores | no `precommit` e na CI |
+| Content-Security-Policy com nonce | só roda script inline com o nonce da requisição; bloqueia `onclick=` e `javascript:` | em toda resposta HTML (`plugs/content_security_policy.ex`) |
+| gitleaks | procura segredos commitados no histórico do git; o `.gitleaks.toml` libera só o `secret_key_base` de dev e test | job `secrets` da CI, a cada push e PR |
+| Trivy | procura vulnerabilidades altas e críticas, com correção publicada, na imagem de produção | job `image` da CI, no push para o `master` e toda segunda-feira |
+| `apt-get upgrade` no `Dockerfile` | atualiza os pacotes do Debian da imagem de produção, que vem fixada numa data | a cada build da imagem |
+| Dependabot | PRs semanais de atualização das dependências mix e das actions. Não atualiza as imagens do gitleaks e do Trivy, que estão fixadas no `ci.yml` | toda semana |
+| Portas em `127.0.0.1` | a app e o banco só aceitam conexões desta máquina | sempre, em dev |
+| `/security-review` | revisão do diff atrás do que as ferramentas não pegam: autorização, queries sem escopo, dados sensíveis em log | antes do PR, quando o diff toca `lib/`, `config/` ou as migrations (passo 8) |
+
+### CI e entrega
+
+| Item | Para que serve | Quando é usado |
+|---|---|---|
+| GitHub Actions: job `checks` | roda o equivalente ao `mix precommit` num container `elixir:1.19`, com cache de `deps/` e `_build/` | a cada push e PR |
+<!-- db:start -->
+| Serviço `postgres:18-alpine` no job `checks` | o banco dos testes na CI | a cada push e PR |
+<!-- db:end -->
+| GitHub Actions: jobs `secrets` e `image` | o gitleaks; o build da release com o Trivy | `secrets` a cada push e PR; `image` no `master` e toda semana |
+| `Dockerfile` (`mix phx.gen.release --docker`) | imagem de produção com a release e o `bin/server` | no deploy e no job `image` |
+| `Dockerfile.dev` e `docker-compose.yaml` | imagem e serviços de desenvolvimento, com o usuário do host (os arquivos ficam no seu usuário) | sempre, em dev |
+
 ## Construção da aplicação
 
 A aplicação é construída com um agente de IA (Claude Code) e as
@@ -99,18 +173,42 @@ A versão interativa, com tema claro e escuro, zoom e os cards das pastas, dos t
 
 ### Ferramentas
 
-- **Claude Code**, aberto na pasta do projeto. O `CLAUDE.md` importa o `AGENTS.md` (as
-  convenções do projeto, inclusive como rodar comandos no container), e as skills
-  `/design-system`, `/screens`, `/prototype-screen` e `/next-step` ficam em `.claude/skills/`.
-  O `/security-review` (passo 8) já vem com o Claude Code
+- **Claude Code**, aberto na pasta do projeto. As skills do projeto ficam em `.claude/skills/`;
+  o `/security-review` já vem com o Claude Code
 - **Skills do Matt Pocock**: no Claude Code, rode
   `/plugin install mattpocock-skills@claude-plugins-official` e depois, uma vez no projeto,
   `/setup-matt-pocock-skills`, para escolher onde ficam as specs e os tickets (issues do
-  GitHub, com o CLI `gh` logado, ou arquivos locais). Na dúvida sobre qual skill usar, pergunte
-  ao `/ask-matt`
+  GitHub, com o CLI `gh` logado, ou arquivos locais)
 - **Web Design Guidelines** (opcional): `npx skills add vercel-labs/agent-skills --skill
   web-design-guidelines`, para revisar a acessibilidade e a usabilidade das telas. As regras
   são genéricas (algumas são sobre React): aplique só o que fizer sentido
+
+| Skill | Origem | Para que serve | Quando é usada |
+|---|---|---|---|
+| `/design-system` | projeto | aplica os temas do daisyUI, mede o contraste e cria a galeria | passo 1 e a cada mudança de cores |
+| `/grill-with-docs` | Matt Pocock | entrevista sobre a ideia; grava o vocabulário e as decisões | passo 2 |
+| `/research` | Matt Pocock | lê fontes em segundo plano e devolve um arquivo com citações | passo 2, quando uma pergunta depende de documentação |
+| `/to-questionnaire` | Matt Pocock | escreve as perguntas para quem tem a resposta | passo 2, quando ela está com outra pessoa |
+| `/to-spec` | Matt Pocock | escreve a spec com as user stories | passo 3 |
+| `/screens` | projeto | critérios de aceite, telas em `docs/ui/screens.md` e fluxos | passo 4 |
+| `/prototype-screen` | projeto | protótipo de uma tela com dados falsos, um estado por critério | passo 5 |
+| `/to-tickets` | Matt Pocock | fatia a spec em tracer bullets, com os bloqueios | passo 6 |
+| `/implement` e `/implement-spec` | Matt Pocock | implementam um ticket, ou a spec com subagentes | passo 7 |
+| `/tdd` | Matt Pocock | um teste, o mínimo de código, o próximo teste | dentro do passo 7, ou avulso |
+| `/code-review` | Matt Pocock | convenções, fidelidade à spec e refatoração | fim do passo 7 |
+| `/security-review` | Claude Code | revisão de segurança do diff | passo 8 |
+| `/pr` | Matt Pocock | escreve o corpo do PR com as evidências e o risco | passo 8 |
+| `/retro` | Matt Pocock | melhorias no ambiente do agente | passo 9 |
+| `/next-step` | projeto | lê o estado do projeto e diz qual skill rodar | a qualquer momento, sobretudo ao retomar |
+| `/diagnosing-bugs` | Matt Pocock | laço de diagnóstico para bugs difíceis | quando surgir um bug assim |
+| `/ask-matt` | Matt Pocock | indica qual skill do Matt Pocock usar | na dúvida |
+| `/web-design-guidelines` | Vercel (opcional) | revisa a acessibilidade e a usabilidade | antes de marcar uma tela como `reviewed` |
+
+O `CLAUDE.md` importa o `AGENTS.md`, lido no início de cada conversa. Ele junta as usage rules
+do Phoenix (Elixir, Phoenix, Ecto, HEEx e LiveView, escritas pela equipe do Phoenix para a versão
+instalada) às convenções do projeto: Docker, commits, testes, UI e segurança. Uma das convenções
+manda a IA ler a documentação em `deps/` antes de usar uma API. Ela evita código de versões
+antigas sem precisar de um MCP de documentação, e foi validada contra o Tidewave num teste A/B.
 
 ### Por onde começar
 

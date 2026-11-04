@@ -14,16 +14,12 @@ Assim, você não precisa baixar, instalar e configurar dependências, nem criar
 
 O template usa:
 
-- Docker
-- Docker Compose
-- Shell script
+- **Docker e Docker Compose:** criam o projeto e rodam tudo em containers, sem Elixir no host
+- **Shell script:** o `run.sh` gera o projeto, o `docker.sh` instala o Docker no Ubuntu e o `e2e.sh` testa o template de ponta a ponta
+- **CLI `gh`** (opcional): cria o repositório no GitHub (passo 5)
+- **[Archify](https://github.com/tt-a1i/archify):** gerou o diagrama do fluxo de desenvolvimento (passo 6)
 
-O projeto gerado usa:
-
-- Elixir e Phoenix, com LiveView
-- PostgreSQL (opcional, com Ecto)
-- Tailwind CSS e daisyUI
-- GitHub Actions
+O projeto gerado usa Elixir, Phoenix e LiveView, PostgreSQL (opcional, com Ecto), Tailwind CSS e daisyUI, e GitHub Actions. A lista completa, com cada biblioteca, ferramenta de segurança e skill, para que serve e quando é usada, está em "Stack e ferramentas" no [`templates/README.development.md`](templates/README.development.md).
 
 ## Primeiros passos
 
