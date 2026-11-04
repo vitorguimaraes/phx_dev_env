@@ -1,0 +1,397 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Exemplo de uso: pedidos da loja, do run.sh ao merge",
+    "subtitle": "Quem faz o quê em cada etapa do fluxo; os detalhes estão em docs/exemplo-de-uso.md",
+    "locale": "pt-BR",
+    "output": "docs/exemplo-de-uso.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "default": {
+          "label": "Ação ou arquivo gerado"
+        },
+        "emphasis": {
+          "label": "Skill que você chama"
+        },
+        "security": {
+          "label": "Verificação ou aprovação"
+        },
+        "dashed": {
+          "label": "Automático, sem você pedir"
+        },
+        "return": {
+          "label": "Resultado"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "voce",
+      "type": "external",
+      "label": "Você",
+      "sublabel": "decide e aprova"
+    },
+    {
+      "id": "ia",
+      "type": "frontend",
+      "label": "Claude Code",
+      "sublabel": "lê o AGENTS.md"
+    },
+    {
+      "id": "skills",
+      "type": "backend",
+      "label": "Skills",
+      "sublabel": "projeto e Matt Pocock"
+    },
+    {
+      "id": "projeto",
+      "type": "database",
+      "label": "Projeto",
+      "sublabel": "docs, código, git"
+    },
+    {
+      "id": "checks",
+      "type": "security",
+      "label": "Verificações",
+      "sublabel": "precommit e CI"
+    },
+    {
+      "id": "github",
+      "type": "cloud",
+      "label": "GitHub",
+      "sublabel": "CI e Dependabot"
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 238,
+      "label": "0. Criar e publicar"
+    },
+    {
+      "from": 248,
+      "to": 366,
+      "label": "1. Design system"
+    },
+    {
+      "from": 376,
+      "to": 466,
+      "label": "2 a 4. Domínio, spec e telas"
+    },
+    {
+      "from": 476,
+      "to": 596,
+      "label": "5. Protótipo"
+    },
+    {
+      "from": 606,
+      "to": 666,
+      "label": "6. Tickets"
+    },
+    {
+      "from": 676,
+      "to": 896,
+      "label": "7. Implementação"
+    },
+    {
+      "from": 906,
+      "to": 1096,
+      "label": "8. Pull request"
+    },
+    {
+      "from": 1106,
+      "to": 1166,
+      "label": "9. Retrospectiva"
+    },
+    {
+      "from": 1176,
+      "to": 1236,
+      "label": "10. Depois"
+    }
+  ],
+  "messages": [
+    {
+      "id": "run-sh",
+      "from": "voce",
+      "to": "projeto",
+      "y": 165,
+      "label": "./run.sh --ecto --auth",
+      "variant": "default"
+    },
+    {
+      "id": "push",
+      "from": "voce",
+      "to": "github",
+      "y": 195,
+      "label": "gh repo create --push",
+      "variant": "default"
+    },
+    {
+      "id": "first-ci",
+      "from": "github",
+      "to": "checks",
+      "y": 225,
+      "label": "checks, secrets, image",
+      "variant": "security"
+    },
+    {
+      "id": "ds-call",
+      "from": "voce",
+      "to": "ia",
+      "y": 263,
+      "label": "/design-system",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ds-skill",
+      "from": "ia",
+      "to": "skills",
+      "y": 293,
+      "label": "temas do daisyUI",
+      "variant": "default"
+    },
+    {
+      "id": "ds-files",
+      "from": "skills",
+      "to": "projeto",
+      "y": 323,
+      "label": "app.css, /dev/components",
+      "variant": "default"
+    },
+    {
+      "id": "ds-approve",
+      "from": "voce",
+      "to": "projeto",
+      "y": 353,
+      "label": "aprova: defined",
+      "variant": "security"
+    },
+    {
+      "id": "spec-call",
+      "from": "voce",
+      "to": "ia",
+      "y": 391,
+      "label": "/grill-with-docs, /to-spec, /screens",
+      "variant": "emphasis"
+    },
+    {
+      "id": "spec-skill",
+      "from": "ia",
+      "to": "skills",
+      "y": 421,
+      "label": "entrevista e critérios",
+      "variant": "default"
+    },
+    {
+      "id": "spec-files",
+      "from": "skills",
+      "to": "projeto",
+      "y": 451,
+      "label": "GLOSSARY, spec, screens.md",
+      "variant": "return"
+    },
+    {
+      "id": "proto-call",
+      "from": "voce",
+      "to": "ia",
+      "y": 491,
+      "label": "/prototype-screen pedidos",
+      "variant": "emphasis"
+    },
+    {
+      "id": "proto-files",
+      "from": "ia",
+      "to": "projeto",
+      "y": 521,
+      "label": "/dev/prototypes: 3 estados",
+      "variant": "default"
+    },
+    {
+      "id": "proto-check",
+      "from": "ia",
+      "to": "checks",
+      "y": 551,
+      "label": "mix precommit",
+      "variant": "security"
+    },
+    {
+      "id": "proto-approve",
+      "from": "voce",
+      "to": "projeto",
+      "y": 581,
+      "label": "aprova: approved",
+      "variant": "security"
+    },
+    {
+      "id": "tickets-call",
+      "from": "voce",
+      "to": "ia",
+      "y": 621,
+      "label": "/to-tickets",
+      "variant": "emphasis"
+    },
+    {
+      "id": "tickets-out",
+      "from": "skills",
+      "to": "github",
+      "y": 651,
+      "label": "4 tracer bullets",
+      "variant": "return"
+    },
+    {
+      "id": "impl-call",
+      "from": "voce",
+      "to": "ia",
+      "y": 691,
+      "label": "/implement 1",
+      "variant": "emphasis"
+    },
+    {
+      "id": "impl-tdd",
+      "from": "ia",
+      "to": "skills",
+      "y": 721,
+      "label": "/tdd: teste que falha",
+      "variant": "default",
+      "note": "antes de usar Ecto.Enum e stream/4, lê a documentação em deps/"
+    },
+    {
+      "id": "impl-code",
+      "from": "skills",
+      "to": "projeto",
+      "y": 791,
+      "label": "migration, contexto, LiveView",
+      "variant": "default"
+    },
+    {
+      "id": "impl-check",
+      "from": "ia",
+      "to": "checks",
+      "y": 821,
+      "label": "precommit: Credo, Sobelow, testes",
+      "variant": "security"
+    },
+    {
+      "id": "impl-green",
+      "from": "checks",
+      "to": "ia",
+      "y": 851,
+      "label": "verde",
+      "variant": "return"
+    },
+    {
+      "id": "impl-commit",
+      "from": "ia",
+      "to": "projeto",
+      "y": 881,
+      "label": "/code-review e commit",
+      "variant": "default"
+    },
+    {
+      "id": "pr-call",
+      "from": "voce",
+      "to": "ia",
+      "y": 921,
+      "label": "peça o PR",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pr-security",
+      "from": "ia",
+      "to": "skills",
+      "y": 951,
+      "label": "/security-review",
+      "variant": "security",
+      "note": "acha get_order! sem o scope do usuário; a IA corrige e testa"
+    },
+    {
+      "id": "pr-open",
+      "from": "skills",
+      "to": "github",
+      "y": 1021,
+      "label": "/pr",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pr-ci",
+      "from": "github",
+      "to": "checks",
+      "y": 1051,
+      "label": "checks e secrets",
+      "variant": "security"
+    },
+    {
+      "id": "merge-trivy",
+      "from": "checks",
+      "to": "github",
+      "y": 1081,
+      "label": "merge: image e Trivy",
+      "variant": "return"
+    },
+    {
+      "id": "retro-call",
+      "from": "voce",
+      "to": "ia",
+      "y": 1121,
+      "label": "/retro",
+      "variant": "emphasis"
+    },
+    {
+      "id": "retro-rule",
+      "from": "ia",
+      "to": "projeto",
+      "y": 1151,
+      "label": "regra nova no AGENTS.md",
+      "variant": "default"
+    },
+    {
+      "id": "dependabot",
+      "from": "github",
+      "to": "voce",
+      "y": 1191,
+      "label": "PR semanal do Dependabot",
+      "variant": "dashed"
+    },
+    {
+      "id": "next-step",
+      "from": "voce",
+      "to": "ia",
+      "y": 1221,
+      "label": "/next-step ao retomar",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Você decide",
+      "items": [
+        "Aprova o design system, as telas e os protótipos",
+        "Compara a tela real com o protótipo no navegador",
+        "Pede o PR e faz o merge"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Verificações em camadas",
+      "items": [
+        "precommit: compilação, Credo, Sobelow, auditorias e testes",
+        "/security-review: autorização que as ferramentas não veem",
+        "CI: gitleaks no PR, Trivy na imagem do master"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Uma conversa por etapa",
+      "items": [
+        "Etapas 2 a 4 na mesma conversa",
+        "Depois, /clear entre protótipos e tickets",
+        "Tudo que importa fica salvo no projeto"
+      ]
+    }
+  ]
+}

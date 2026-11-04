@@ -114,7 +114,9 @@ A aplicação é construída com o [Claude Code](https://claude.com/claude-code)
 
 A versão interativa, com tema claro e escuro, zoom e os cards das pastas, dos templates e das verificações, está em [`docs/fluxo-de-desenvolvimento.html`](docs/fluxo-de-desenvolvimento.html) (abra o arquivo no navegador; o GitHub mostra só o código-fonte).
 
-O diagrama foi gerado com a skill [Archify](https://github.com/tt-a1i/archify); a fonte é o [`templates/docs/fluxo-de-desenvolvimento.archify.json`](templates/docs/fluxo-de-desenvolvimento.archify.json). Para atualizá-lo, edite o JSON e peça ao Claude Code para rodar o `finalize` do Archify de novo.
+Para ver o fluxo aplicado a uma funcionalidade inteira, com as skills, as bibliotecas e as verificações de cada etapa, leia o [exemplo de uso](docs/exemplo-de-uso.md): uma loja em que os clientes acompanham os próprios pedidos, do `./run.sh` ao merge.
+
+O diagrama foi gerado com a skill [Archify](https://github.com/tt-a1i/archify); a fonte é o [`templates/docs/fluxo-de-desenvolvimento.archify.json`](templates/docs/fluxo-de-desenvolvimento.archify.json). O diagrama do exemplo de uso tem a fonte em [`templates/docs/exemplo-de-uso.archify.json`](templates/docs/exemplo-de-uso.archify.json). Para atualizar qualquer um dos dois, edite o JSON e peça ao Claude Code para rodar o `finalize` do Archify de novo.
 
 ### 7. Teste o template
 

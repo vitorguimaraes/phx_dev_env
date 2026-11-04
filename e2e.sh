@@ -96,6 +96,7 @@ check "Credo, Sobelow, mix_audit and hex.audit in mix precommit" bash -c 'grep -
 check "CI security jobs and Dependabot" bash -c 'grep -q "mix hex.audit" .github/workflows/ci.yml && grep -q "gitleaks" .github/workflows/ci.yml && grep -q "aquasec/trivy" .github/workflows/ci.yml && grep -q "package-ecosystem: mix" .github/dependabot.yml && grep -q "secret_key_base" .gitleaks.toml'
 check "production Dockerfile upgrades the Debian packages" bash -c \
     "sed -n '/AS final/,\$p' Dockerfile | grep -A1 '^RUN apt-get update' | grep -q 'apt-get upgrade -y'"
+check "workflow diagram and usage example in docs/" bash -c 'test -f docs/fluxo-de-desenvolvimento.html && test -f docs/exemplo-de-uso.md && test -f docs/exemplo-de-uso.png && test ! -e templates'
 check "dependency docs rule in AGENTS.md" grep -q "^## Dependency docs" AGENTS.md
 check "app port published only on 127.0.0.1" grep -qF -- '- "127.0.0.1:${APP_HOST_PORT}:${APP_PORT}"' docker-compose.yaml
 check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"

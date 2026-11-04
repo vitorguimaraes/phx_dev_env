@@ -171,6 +171,8 @@ partir do 4, quando a spec já vem pronta).
 
 A versão interativa, com tema claro e escuro, zoom e os cards das pastas, dos templates e das verificações, está em [`docs/fluxo-de-desenvolvimento.html`](docs/fluxo-de-desenvolvimento.html) (abra o arquivo no navegador; o GitHub mostra só o código-fonte).
 
+Para ver o fluxo aplicado a uma funcionalidade inteira, com as skills, as bibliotecas e as verificações de cada etapa, leia o [exemplo de uso](docs/exemplo-de-uso.md): uma loja em que os clientes acompanham os próprios pedidos, do `./run.sh` ao merge.
+
 ### Ferramentas
 
 - **Claude Code**, aberto na pasta do projeto. As skills do projeto ficam em `.claude/skills/`;
