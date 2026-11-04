@@ -96,6 +96,7 @@ check "Credo, Sobelow, mix_audit and hex.audit in mix precommit" bash -c 'grep -
 check "CI security jobs and Dependabot" bash -c 'grep -q "mix hex.audit" .github/workflows/ci.yml && grep -q "gitleaks" .github/workflows/ci.yml && grep -q "aquasec/trivy" .github/workflows/ci.yml && grep -q "package-ecosystem: mix" .github/dependabot.yml && grep -q "secret_key_base" .gitleaks.toml'
 check "production Dockerfile upgrades the Debian packages" bash -c \
     "sed -n '/AS final/,\$p' Dockerfile | grep -A1 '^RUN apt-get update' | grep -q 'apt-get upgrade -y'"
+check "dependency docs rule in AGENTS.md" grep -q "^## Dependency docs" AGENTS.md
 check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"
 check "CSP nonce in the root layout" grep -q 'nonce={@csp_nonce}' "lib/${name}_web/components/layouts/root.html.heex"
 check "no template markers or placeholders left" bash -c \
@@ -127,11 +128,12 @@ if [[ "$use_ecto" == y ]]; then
     check "database names" bash -c "grep -qx DB_CONTAINER_NAME=${name}_db .env && grep -qx POSTGRES_DB=${name}_dev .env"
     check "database host in config" grep -q 'hostname: "db_service"' config/dev.exs config/test.exs
     check "database service in the CI" grep -q 'db_service:' .github/workflows/ci.yml
+    check "Ecto.Repo callbacks hint in AGENTS.md" grep -q "Ecto.Repo functions are callbacks" AGENTS.md
 else
     check "no database service" bash -c "! docker compose config --services | grep -qx db_service"
     check "no database variables" bash -c '! grep -qE "POSTGRES|DATABASE_URL|DB_" .env'
     check "no database in the CI" bash -c '! grep -q "db_service" .github/workflows/ci.yml'
-    check "no database rules in AGENTS.md" bash -c '! grep -q "The database host is" AGENTS.md'
+    check "no database rules in AGENTS.md" bash -c '! grep -q "The database host is" AGENTS.md && ! grep -q "Ecto.Repo functions" AGENTS.md'
 fi
 
 if [[ "$use_auth" == y ]]; then

@@ -23,6 +23,18 @@ them normally, but run every `mix`, `iex` and `make` command inside the containe
   the production release image (`mix phx.gen.release --docker`). When adding a system package
   needed at runtime, add it to both
 
+## Dependency docs
+
+- Before using a function or option of a dependency (Phoenix, LiveView, Ecto and others), read
+  its docs in the source under `deps/<package>/lib`, which is the version in `mix.lock` (e.g.
+  `grep -n "def stream_async" -B60 deps/phoenix_live_view/lib/phoenix_live_view.ex`). `deps/` is
+  shared with the host, so read it with the normal tools. Do not rely on memory for APIs that
+  may have changed
+<!-- db:start -->
+- Ecto.Repo functions are callbacks: look for `@callback insert_all` in
+  `deps/ecto/lib/ecto/repo.ex`
+<!-- db:end -->
+
 ## Commits
 
 - Commit at the end of each completed task, only after
