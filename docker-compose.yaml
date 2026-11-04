@@ -28,7 +28,7 @@ services:
       # keep the IEx history between sessions (stored in the iex_history volume)
       ERL_AFLAGS: "-kernel shell_history enabled"
     ports:
-      - "${APP_HOST_PORT}:${APP_PORT}"
+      - "127.0.0.1:${APP_HOST_PORT}:${APP_PORT}"
     networks:
       - app_net
     # db:start

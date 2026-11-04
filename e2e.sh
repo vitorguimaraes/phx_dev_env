@@ -97,6 +97,7 @@ check "CI security jobs and Dependabot" bash -c 'grep -q "mix hex.audit" .github
 check "production Dockerfile upgrades the Debian packages" bash -c \
     "sed -n '/AS final/,\$p' Dockerfile | grep -A1 '^RUN apt-get update' | grep -q 'apt-get upgrade -y'"
 check "dependency docs rule in AGENTS.md" grep -q "^## Dependency docs" AGENTS.md
+check "app port published only on 127.0.0.1" grep -qF -- '- "127.0.0.1:${APP_HOST_PORT}:${APP_PORT}"' docker-compose.yaml
 check "Content-Security-Policy plug in the router" grep -q "plug ${module}Web.Plugs.ContentSecurityPolicy" "lib/${name}_web/router.ex"
 check "CSP nonce in the root layout" grep -q 'nonce={@csp_nonce}' "lib/${name}_web/components/layouts/root.html.heex"
 check "no template markers or placeholders left" bash -c \

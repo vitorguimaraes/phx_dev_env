@@ -15,7 +15,7 @@ Para subir os serviços e o servidor:
 - `./scripts/dev.sh` abre um shell no container da aplicação; depois rode `mix setup` e `make app`
 - Ou, pelo host com `make` instalado: `make up`, `make app.setup` e `make app`
 
-Acesse [`localhost:__APP_HOST_PORT__`](http://localhost:__APP_HOST_PORT__) (`APP_HOST_PORT` no `.env`).
+Acesse [`localhost:__APP_HOST_PORT__`](http://localhost:__APP_HOST_PORT__) (`APP_HOST_PORT` no `.env`); a app só é acessível a partir da sua máquina, não da rede local.
 
 ### Verificações
 
